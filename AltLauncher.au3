@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.1.0.0
+#AutoIt3Wrapper_Res_Fileversion=0.1.0.1
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Run_Before=cmd /c echo %fileversion% > "%scriptdir%\VERSION"
@@ -40,7 +40,7 @@ Func ReadINISection(ByRef $Ini, $Section)
 	Return $Data
 EndFunc   ;==>ReadINISection
 Func ReadConfig()
-	Global $Ini = @WorkingDir & "\" & StringTrimRight(@ScriptName, 4) & ".ini"
+	Global $Ini = @ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & ".ini"
 	If Not FileExists($Ini) Then ExitMSG("AltLauncher.ini not found.")
 	Global $Name = IniRead($Ini, "General", "Name", Null)
 	Global $Executable = IniRead($Ini, "General", "Executable", Null)
@@ -69,16 +69,16 @@ Func CheckIfAlreadyRunning()
 	Until $ProcessList[0][0] < 2
 EndFunc   ;==>CheckIfAlreadyRunning
 Func CheckStateFile()
-	Return FileExists(@WorkingDir & "\" & StringTrimRight(@ScriptName, 4) & ".state")
+	Return FileExists(@ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & ".state")
 EndFunc   ;==>CheckStateFile
 Func RepairState()
 	$PreservedProfile = $Profile
-	$Profile = FileRead(@WorkingDir & "\" & StringTrimRight(@ScriptName, 4) & ".state")
+	$Profile = FileRead(@ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & ".state")
 	Restore()
 	$Profile = $PreservedProfile
 EndFunc   ;==>RepairState
 Func WriteStateFile()
-	FileWrite(@WorkingDir & "\" & StringTrimRight(@ScriptName, 4) & ".state", $Profile)
+	FileWrite(@ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & ".state", $Profile)
 EndFunc   ;==>WriteStateFile
 Func ShowProgressBar()
 	$Title &= " - Profile: "
@@ -141,7 +141,7 @@ Func Restore()
 			ProgressSet(($i / $Files[0][0] * 33.33 + 66.66), $i & "/" & $Files[0][0] & ": " & ExpandEnvVars($Files[$i][1]))
 			Manage_File($restore, $Files, $i)
 		Next
-		FileDelete(@WorkingDir & "\" & StringTrimRight(@ScriptName, 4) & ".state")
+		FileDelete(@ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & ".state")
 		ProgressSet(100, "Success")
 	EndIf
 EndFunc   ;==>Restore
