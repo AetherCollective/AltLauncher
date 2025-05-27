@@ -2,12 +2,13 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.1.0.1
+#AutoIt3Wrapper_Res_Fileversion=0.1.0.2
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Run_Before=cmd /c echo %fileversion% > "%scriptdir%\VERSION"
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
+#include <File.au3>
 #include <Misc.au3>
 Opt("TrayIconHide", True)
 Global $Title = "AltLauncher"
@@ -29,8 +30,8 @@ WaitWhileGameRunning()
 doExit()
 
 Func RegisterVariables()
-	Global $backup="backup",$restore="restore"
-EndFunc
+	Global $backup = "backup", $restore = "restore"
+EndFunc   ;==>RegisterVariables
 Func ReadINISection(ByRef $Ini, $Section)
 	Local $Data = IniReadSection($Ini, $Section)
 	If @error Then
@@ -41,8 +42,14 @@ Func ReadINISection(ByRef $Ini, $Section)
 EndFunc   ;==>ReadINISection
 Func ReadConfig()
 	Global $Ini = @ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & ".ini"
-	If Not FileExists($Ini) Then ExitMSG("AltLauncher.ini not found.")
+	If Not FileExists($Ini) Then
+		$SearchResults = _FileListToArrayRec(@ScriptDir, StringTrimRight(@ScriptName, 4) & ".ini", $FLTAR_FILES, $FLTAR_RECUR)
+		_ArrayDisplay($SearchResults, @error)
+		If $SearchResults[0] = 1 Then $Ini = @ScriptDir & "\" & $SearchResults[0]
+		If $SearchResults[0] <> 1 Then ExitMSG("AltLauncher.ini not found.")
+	EndIf
 	Global $Name = IniRead($Ini, "General", "Name", Null)
+	Global $Path = IniRead($Ini, "General", "Path", Null)
 	Global $Executable = IniRead($Ini, "General", "Executable", Null)
 	Global $LaunchFlags = IniRead($Ini, "General", "LaunchFlags", Null)
 	Global $MinWait = IniRead($Ini, "Settings", "MinWait", 0)
@@ -87,12 +94,12 @@ EndFunc   ;==>ShowProgressBar
 Func RunLauncherIfNeeded()
 	If FileExists(@ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & "-launcher.cmd") Then
 		ProgressSet(100, "Starting Launcher...", "")
-		ShellExecuteWait(@ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & "-launcher.cmd", "", @ScriptDir, $SHEX_OPEN, @SW_HIDE)
+		ShellExecuteWait(@ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & "-launcher.cmd", "", ($Path = Null) ? @ScriptDir : $Path, $SHEX_OPEN, @SW_HIDE)
 	EndIf
 EndFunc   ;==>RunLauncherIfNeeded
 Func RunGame()
 	ProgressSet(100, "Launching Game...", "")
-	ShellExecute($Executable, $LaunchFlags, @ScriptDir)
+	ShellExecute($Executable, $LaunchFlags, ($Path = Null) ? @ScriptDir : $Path)
 EndFunc   ;==>RunGame
 Func WaitWhileGameRunning()
 	ProgressSet(100, "Waiting for game to close...")
