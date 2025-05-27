@@ -38,11 +38,13 @@ Here are key fields that require user configuration:
 ```ini
 [General]
 Name=GameName
+Path=C:\path\to\game\folder
 Executable=GameExecutable.exe
 LaunchFlags=-some_flag
 ```
 
 -   **`Name`**: Display name of the game.
+-   **`Path`**: Optional path to game's folder.
 -   **`Executable`**: The game’s `.exe` file name.
 -   **`LaunchFlags`**: Optional command-line arguments for custom execution.
 
