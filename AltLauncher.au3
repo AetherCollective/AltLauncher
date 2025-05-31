@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.1.0.3
+#AutoIt3Wrapper_Res_Fileversion=0.1.0.4
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Run_Before=cmd /c echo %fileversion% > "%scriptdir%\VERSION"
@@ -11,6 +11,7 @@
 #include <File.au3>
 #include <Misc.au3>
 Opt("TrayIconHide", True)
+Opt("ExpandEnvStrings", True)
 Global $Title = "AltLauncher"
 
 RegisterVariables()
@@ -126,11 +127,11 @@ Func Backup()
 		Manage_Registry($backup, $Registry, $i)
 	Next
 	For $i = 1 To $Directories[0][0]
-		ProgressSet(($i / $Directories[0][0] * 33.33 + 33.33), $i & "/" & $Directories[0][0] & ": " & ExpandEnvVars($Directories[$i][1]))
+		ProgressSet(($i / $Directories[0][0] * 33.33 + 33.33), $i & "/" & $Directories[0][0] & ": " & $Directories[$i][1])
 		Manage_Directory($backup, $Directories, $i)
 	Next
 	For $i = 1 To $Files[0][0]
-		ProgressSet(($i / $Files[0][0] * 33.33 + 66.66), $i & "/" & $Files[0][0] & ": " & ExpandEnvVars($Files[$i][1]))
+		ProgressSet(($i / $Files[0][0] * 33.33 + 66.66), $i & "/" & $Files[0][0] & ": " & $Files[$i][1])
 		Manage_File($backup, $Files, $i)
 	Next
 EndFunc   ;==>Backup
@@ -141,27 +142,17 @@ Func Restore()
 			Manage_Registry($restore, $Registry, $i)
 		Next
 		For $i = 1 To $Directories[0][0]
-			ProgressSet(($i / $Directories[0][0] * 33.33 + 33.33), $i & "/" & $Directories[0][0] & ": " & ExpandEnvVars($Directories[$i][1]))
+			ProgressSet(($i / $Directories[0][0] * 33.33 + 33.33), $i & "/" & $Directories[0][0] & ": " & $Directories[$i][1])
 			Manage_Directory($restore, $Directories, $i)
 		Next
 		For $i = 1 To $Files[0][0]
-			ProgressSet(($i / $Files[0][0] * 33.33 + 66.66), $i & "/" & $Files[0][0] & ": " & ExpandEnvVars($Files[$i][1]))
+			ProgressSet(($i / $Files[0][0] * 33.33 + 66.66), $i & "/" & $Files[0][0] & ": " & $Files[$i][1])
 			Manage_File($restore, $Files, $i)
 		Next
 		FileDelete(@ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & ".state")
 		ProgressSet(100, "Success")
 	EndIf
 EndFunc   ;==>Restore
-Func ExpandEnvVars($sText)
-	Local $aMatches, $sVar
-	If StringRegExp($sText, "%(.*?)%") Then
-		$aMatches = StringRegExp($sText, "%(.*?)%", 3)
-		For $sVar In $aMatches
-			$sText = StringReplace($sText, "%" & $sVar & "%", EnvGet($sVar))
-		Next
-	EndIf
-	Return $sText
-EndFunc   ;==>ExpandEnvVars
 Func Manage_Registry($Mode, ByRef $Registry, ByRef $i)
 	Local $RegPath = $Registry[$i][1]
 	If $Mode = "backup" Then
@@ -176,7 +167,7 @@ Func Manage_Registry($Mode, ByRef $Registry, ByRef $i)
 	EndIf
 EndFunc   ;==>Manage_Registry
 Func Manage_Directory($Mode, ByRef $Directories, ByRef $i)
-	Local $DirPath = ExpandEnvVars($Directories[$i][1])
+	Local $DirPath = $Directories[$i][1]
 	Local $BackupPath = $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Directories[$i][0]
 	$OriginalFileList = _FileListToArrayRec($DirPath, "*", $FLTAR_FILES, $FLTAR_RECUR)
 	$BackupFileList = _FileListToArrayRec($BackupPath, "*", $FLTAR_FILES, $FLTAR_RECUR)
@@ -203,7 +194,7 @@ Func Manage_Directory($Mode, ByRef $Directories, ByRef $i)
 	EndIf
 EndFunc   ;==>Manage_Directory
 Func Manage_File($Mode, ByRef $Files, ByRef $i)
-	Local $FilePath = ExpandEnvVars($Files[$i][1])
+	Local $FilePath = $Files[$i][1]
 	Local $BackupPath = $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Files[$i][0]
 	If $Mode = "backup" Then
 		FileMove($FilePath, $FilePath & '.AltLauncher-Backup', $FC_OVERWRITE + $FC_CREATEPATH)
@@ -240,6 +231,7 @@ Func doExit($immediately = False)
 	OnAutoItExitUnRegister("OnExit")
 	AdlibUnRegister("EarlyExitCheck")
 	WinActivate($Title)
+	WinSetOnTop($Title, "", $WINDOWS_ONTOP)
 	If $immediately = False Then Sleep(1000)
 	Restore()
 	Exit Sleep(($immediately = True) ? 0 : 3000)
