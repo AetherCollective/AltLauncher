@@ -159,7 +159,7 @@ AltLauncher comes with an auto-updater program that can act as a drop-in replace
    	-   `%PROGRAMFILES%` expands to `C:\Program Files`
    	-   `%PROGRAMFILES(x86)%` expands to `C:\Program Files (x86)`
 	-   `%PROGRAMDATA%` expands to `C:\ProgramData`
-  - Set the environment paths `%SteamID%`, `%SteamID64%`, and `%UbisoftID%` to your user-id. 
+  - Set the environment paths `%SteamID3%`, `%SteamID64%`, and `%UbisoftID%` to your user-id. 
 	  - You can obtain your user-id by checking the following directories: 
 	  - `C:\Program Files (x86)\Steam\userdata`
 	  - `C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames`
