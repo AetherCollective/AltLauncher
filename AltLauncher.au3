@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.1.0.4
+#AutoIt3Wrapper_Res_Fileversion=0.1.0.5
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Run_Before=cmd /c echo %fileversion% > "%scriptdir%\VERSION"
@@ -183,6 +183,8 @@ Func Manage_Directory($Mode, ByRef $Directories, ByRef $i)
 			For $j = UBound($BackupFileList) - 1 To 1 Step -1
 				If _ArraySearch($OriginalFileList, $BackupFileList[$j]) <> -1 Then
 					_ArrayDelete($BackupFileList, $j)
+				Else
+					FileCopy($DirPath& '\' &$BackupFileList[$j], $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' &$BackupFileList[$j], $FC_OVERWRITE)
 				EndIf
 			Next
 			For $j = 1 To UBound($BackupFileList) - 1
