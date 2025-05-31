@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.1.0.2
+#AutoIt3Wrapper_Res_Fileversion=0.1.0.3
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Run_Before=cmd /c echo %fileversion% > "%scriptdir%\VERSION"
@@ -44,7 +44,6 @@ Func ReadConfig()
 	Global $Ini = @ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & ".ini"
 	If Not FileExists($Ini) Then
 		$SearchResults = _FileListToArrayRec(@ScriptDir, StringTrimRight(@ScriptName, 4) & ".ini", $FLTAR_FILES, $FLTAR_RECUR)
-		_ArrayDisplay($SearchResults, @error)
 		If $SearchResults[0] = 1 Then $Ini = @ScriptDir & "\" & $SearchResults[0]
 		If $SearchResults[0] <> 1 Then ExitMSG("AltLauncher.ini not found.")
 	EndIf
@@ -54,6 +53,7 @@ Func ReadConfig()
 	Global $LaunchFlags = IniRead($Ini, "General", "LaunchFlags", Null)
 	Global $MinWait = IniRead($Ini, "Settings", "MinWait", 0)
 	Global $MaxWait = IniRead($Ini, "Settings", "MaxWait", 0)
+	Global $ForbidDeletions = IniRead($Ini, "Settings", "ForbidDeletions", (EnvGet("AltLauncher_ForbidDeletions") <> "") ? EnvGet("AltLauncher_ForbidDeletions") : False)
 	Global $ProfilesPath = IniRead($Ini, "Profiles", "Path", (EnvGet("AltLauncher_Path") <> "") ? EnvGet("AltLauncher_Path") : "C:\AltLauncher")
 	Global $ProfilesSubPath = IniRead($Ini, "Profiles", "SubPath", EnvGet("AltLauncher_SubPath"))
 EndFunc   ;==>ReadConfig
@@ -178,14 +178,26 @@ EndFunc   ;==>Manage_Registry
 Func Manage_Directory($Mode, ByRef $Directories, ByRef $i)
 	Local $DirPath = ExpandEnvVars($Directories[$i][1])
 	Local $BackupPath = $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Directories[$i][0]
-	$DirSlash = $Directories[$i][0] = "" ? "" : "\"
+	$OriginalFileList = _FileListToArrayRec($DirPath, "*", $FLTAR_FILES, $FLTAR_RECUR)
+	$BackupFileList = _FileListToArrayRec($BackupPath, "*", $FLTAR_FILES, $FLTAR_RECUR)
 	If $Mode = "backup" Then
 		If Not FileExists($DirPath) Then DirCreate($DirPath)
 		If Not FileExists($BackupPath) Then DirCreate($BackupPath)
 		DirMove($DirPath, $DirPath & '.AltLauncher-Backup', $FC_OVERWRITE)
 		DirCopy($BackupPath, $DirPath, $FC_OVERWRITE)
 	ElseIf $Mode = "restore" Then
-		DirCopy($DirPath, $BackupPath, $FC_OVERWRITE)
+		If $ForbidDeletions = "True" Then
+			DirCopy($DirPath, $BackupPath, $FC_OVERWRITE)
+		Else
+			For $j = UBound($BackupFileList) - 1 To 1 Step -1
+				If _ArraySearch($OriginalFileList, $BackupFileList[$j]) <> -1 Then
+					_ArrayDelete($BackupFileList, $j)
+				EndIf
+			Next
+			For $j = 1 To UBound($BackupFileList) - 1
+				FileDelete($ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $BackupFileList[$j])
+			Next
+		EndIf
 		DirRemove($DirPath, $DIR_REMOVE)
 		DirMove($DirPath & '.AltLauncher-Backup', $DirPath)
 	EndIf
@@ -197,7 +209,11 @@ Func Manage_File($Mode, ByRef $Files, ByRef $i)
 		FileMove($FilePath, $FilePath & '.AltLauncher-Backup', $FC_OVERWRITE + $FC_CREATEPATH)
 		FileCopy($BackupPath, $FilePath, $FC_OVERWRITE + $FC_CREATEPATH)
 	ElseIf $Mode = "restore" Then
-		FileMove($FilePath, $BackupPath, $FC_OVERWRITE + $FC_CREATEPATH)
+		If $ForbidDeletions = "true" Then
+			FileMove($FilePath, $BackupPath, $FC_OVERWRITE + $FC_CREATEPATH)
+		Else
+			FileDelete($BackupPath)
+		EndIf
 		FileMove($FilePath & '.AltLauncher-Backup', $FilePath, $FC_OVERWRITE + $FC_CREATEPATH)
 	EndIf
 EndFunc   ;==>Manage_File
