@@ -2,10 +2,10 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.1.0.5
+#AutoIt3Wrapper_Res_Fileversion=0.1.0.6
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
-#AutoIt3Wrapper_Run_Before=cmd /c echo %fileversion% > "%scriptdir%\VERSION"
+#AutoIt3Wrapper_Run_After=cmd /c echo %fileversion% > "%scriptdir%\VERSION"
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
 #include <File.au3>
@@ -45,8 +45,9 @@ Func ReadConfig()
 	Global $Ini = @ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & ".ini"
 	If Not FileExists($Ini) Then
 		$SearchResults = _FileListToArrayRec(@ScriptDir, StringTrimRight(@ScriptName, 4) & ".ini", $FLTAR_FILES, $FLTAR_RECUR)
-		If $SearchResults[0] = 1 Then $Ini = @ScriptDir & "\" & $SearchResults[0]
-		If $SearchResults[0] <> 1 Then ExitMSG("AltLauncher.ini not found.")
+		If Not IsArray($SearchResults) Then ExitMSG("AltLauncher.ini not found.")
+		If $SearchResults[0] <> 1 Then ExitMSG("Multiple AltLauncher.ini found. Please remove all but one and try again.")
+		$Ini = @ScriptDir & "\" & $SearchResults[1]
 	EndIf
 	Global $Name = IniRead($Ini, "General", "Name", Null)
 	Global $Path = IniRead($Ini, "General", "Path", Null)
@@ -184,7 +185,7 @@ Func Manage_Directory($Mode, ByRef $Directories, ByRef $i)
 				If _ArraySearch($OriginalFileList, $BackupFileList[$j]) <> -1 Then
 					_ArrayDelete($BackupFileList, $j)
 				Else
-					FileCopy($DirPath& '\' &$BackupFileList[$j], $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' &$BackupFileList[$j], $FC_OVERWRITE)
+					FileCopy($DirPath & '\' & $BackupFileList[$j], $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $BackupFileList[$j], $FC_OVERWRITE)
 				EndIf
 			Next
 			For $j = 1 To UBound($BackupFileList) - 1
