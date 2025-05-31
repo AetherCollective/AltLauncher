@@ -151,9 +151,14 @@ AltLauncher comes with an auto-updater program that can act as a drop-in replace
 
   - On Steam, you can modify the launch options to run the game through AltLauncher:
 	  - `"C:\Path\To\AltLauncher.exe" -- %command%`
+  - You can disable the deletion of removed files and folders by setting `True` or `False` either the environment path: `AltLauncher_ForbidDeletions` or the ini setting: `[Settings]ForbidDeletions`
   - AltLauncher supports **environment variable expansion**, allowing dynamic resolution of paths:
-	-   `%USERPROFILE%` will automatically expand to `C:\Users\YourUsername\`
-	-   `%APPDATA%` expands to `C:\Users\YourUsername\AppData\Roaming\`
+	-   `%USERPROFILE%` will automatically expand to `C:\Users\YourUsername`
+	-   `%LOCALAPPDATA%` expands to `C:\Users\YourUsername\AppData\Local`
+  	-   `%APPDATA%` expands to `C:\Users\YourUsername\AppData\Roaming`
+   	-   `%PROGRAMFILES%` expands to `C:\Program Files`
+   	-   `%PROGRAMFILES(x86)%` expands to `C:\Program Files (x86)`
+	-   `%PROGRAMDATA%` expands to `C:\ProgramData`
   - Set the environment paths `%SteamID%`, `%SteamID64%`, and `%UbisoftID%` to your user-id. 
 	  - You can obtain your user-id by checking the following directories: 
 	  - `C:\Program Files (x86)\Steam\userdata`
