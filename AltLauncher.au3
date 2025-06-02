@@ -57,6 +57,7 @@ Func ReadConfig()
 	Global $MinWait = IniRead($Ini, "Settings", "MinWait", 0)
 	Global $MaxWait = IniRead($Ini, "Settings", "MaxWait", 0)
 	Global $ForbidDeletions = IniRead($Ini, "Settings", "ForbidDeletions", (EnvGet("AltLauncher_ForbidDeletions") <> "") ? EnvGet("AltLauncher_ForbidDeletions") : False)
+	Global $UseRecyclingBin = IniRead($Ini, "Settings", "UseRecyclingBin", (EnvGet("AltLauncher_UseRecyclingBin") <> "") ? EnvGet("AltLauncher_UseRecyclingBin") : False)
 	Global $ProfilesPath = IniRead($Ini, "Profiles", "Path", (EnvGet("AltLauncher_Path") <> "") ? EnvGet("AltLauncher_Path") : "C:\AltLauncher")
 	Global $ProfilesSubPath = IniRead($Ini, "Profiles", "SubPath", EnvGet("AltLauncher_SubPath"))
 EndFunc   ;==>ReadConfig
@@ -191,7 +192,11 @@ Func Manage_Directory($Mode, ByRef $Directories, ByRef $i)
 				EndIf
 			Next
 			For $j = UBound($ProfileFileList) - 1 To 1 Step -1
-				FileRecycle($ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $ProfileFileList[$j])
+				If $UseRecyclingBin = "False" Then
+					FileDelete($ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $ProfileFileList[$j])
+				Else
+					FileRecycle($ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $ProfileFileList[$j])
+				EndIf
 			Next
 			$FolderCleanupList = _FileListToArrayRec($BackupPath, "*", $FLTA_FOLDERS, $FLTAR_RECUR)
 			For $j = UBound($FolderCleanupList) - 1 To 1 Step -1
@@ -202,7 +207,11 @@ Func Manage_Directory($Mode, ByRef $Directories, ByRef $i)
 				EndIf
 			Next
 		EndIf
-		FileRecycle($DirPath)
+		If $UseRecyclingBin = "False" Then
+			DirRemove($DirPath, $DIR_REMOVE)
+		Else
+			FileRecycle($DirPath)
+		EndIf
 		DirMove($DirPath & '.AltLauncher-Backup', $DirPath)
 	EndIf
 EndFunc   ;==>Manage_Directory
@@ -216,7 +225,11 @@ Func Manage_File($Mode, ByRef $Files, ByRef $i)
 		If $ForbidDeletions = "true" Then
 			FileMove($FilePath, $BackupPath, $FC_OVERWRITE + $FC_CREATEPATH)
 		Else
-			FileRecycle($BackupPath)
+			If $UseRecyclingBin = "False" Then
+				FileDelete($BackupPath)
+			Else
+				FileRecycle($BackupPath)
+			EndIf
 		EndIf
 		FileMove($FilePath & '.AltLauncher-Backup', $FilePath, $FC_OVERWRITE + $FC_CREATEPATH)
 	EndIf
