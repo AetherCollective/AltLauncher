@@ -56,8 +56,7 @@ Func ReadConfig()
 	Global $LaunchFlags = IniRead($Ini, "General", "LaunchFlags", Null)
 	Global $MinWait = IniRead($Ini, "Settings", "MinWait", 0)
 	Global $MaxWait = IniRead($Ini, "Settings", "MaxWait", 0)
-	Global $ForbidDeletions = IniRead($Ini, "Settings", "ForbidDeletions", (EnvGet("AltLauncher_ForbidDeletions") <> "") ? EnvGet("AltLauncher_ForbidDeletions") : False)
-	Global $UseRecyclingBin = IniRead($Ini, "Settings", "UseRecyclingBin", (EnvGet("AltLauncher_UseRecyclingBin") <> "") ? EnvGet("AltLauncher_UseRecyclingBin") : False)
+	Global $UseRecyclingBin = IniRead($Ini, "Settings", "UseRecyclingBin", (EnvGet("AltLauncher_UseRecyclingBin") <> "") ? EnvGet("AltLauncher_UseRecyclingBin") : Null)
 	Global $ProfilesPath = IniRead($Ini, "Profiles", "Path", (EnvGet("AltLauncher_Path") <> "") ? EnvGet("AltLauncher_Path") : "C:\AltLauncher")
 	Global $ProfilesSubPath = IniRead($Ini, "Profiles", "SubPath", EnvGet("AltLauncher_SubPath"))
 EndFunc   ;==>ReadConfig
@@ -178,7 +177,7 @@ Func Manage_Directory($Mode, ByRef $Directories, ByRef $i)
 		DirMove($DirPath, $DirPath & '.AltLauncher-Backup', $FC_OVERWRITE)
 		DirCopy($BackupPath, $DirPath, $FC_OVERWRITE)
 	ElseIf $Mode = "restore" Then
-		If $ForbidDeletions = "True" Then
+		If $UseRecyclingBin = "True" Then
 			DirCopy($DirPath, $BackupPath, $FC_OVERWRITE)
 		Else
 			$GameFileList = _FileListToArrayRec($DirPath, "*", $FLTAR_FILES, $FLTAR_RECUR)
@@ -200,11 +199,7 @@ Func Manage_Directory($Mode, ByRef $Directories, ByRef $i)
 			Next
 			$FolderCleanupList = _FileListToArrayRec($BackupPath, "*", $FLTA_FOLDERS, $FLTAR_RECUR)
 			For $j = UBound($FolderCleanupList) - 1 To 1 Step -1
-				$SubFolder = $BackupPath & $FolderCleanupList[$j]
-				_FileListToArrayRec($SubFolder, "*", $FLTA_FILESFOLDERS, $FLTAR_RECUR)
-				If @extended = 9 Then
-					DirRemove($SubFolder)
-				EndIf
+				DirRemove($BackupPath & $FolderCleanupList[$j], $DIR_DEFAULT)
 			Next
 		EndIf
 		If $UseRecyclingBin = "False" Then
@@ -222,7 +217,7 @@ Func Manage_File($Mode, ByRef $Files, ByRef $i)
 		FileMove($FilePath, $FilePath & '.AltLauncher-Backup', $FC_OVERWRITE + $FC_CREATEPATH)
 		FileCopy($BackupPath, $FilePath, $FC_OVERWRITE + $FC_CREATEPATH)
 	ElseIf $Mode = "restore" Then
-		If $ForbidDeletions = "true" Then
+		If $UseRecyclingBin = "true" Then
 			FileMove($FilePath, $BackupPath, $FC_OVERWRITE + $FC_CREATEPATH)
 		Else
 			If $UseRecyclingBin = "False" Then

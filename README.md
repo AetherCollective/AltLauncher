@@ -151,7 +151,10 @@ AltLauncher comes with an auto-updater program that can act as a drop-in replace
 
   - On Steam, you can modify the launch options to run the game through AltLauncher:
 	  - `"C:\Path\To\AltLauncher.exe" -- %command%`
-  - You can disable the deletion of removed files and folders by setting `True` or `False` either the environment path: `AltLauncher_ForbidDeletions` or the ini setting: `[Settings]ForbidDeletions`
+  - AltLauncher can detect when a save file has been erased by the player and can recycling or delete them from the profile folder. This behaviour can be controlled with the environment variable: `AltLauncher_UseRecyclingBin` or the ini setting: `[Settings]UseRecyclingBin`
+  - 	When set to `True`, erased files will be sent to the recycling bin. This allows the user to recover the files if deleted by accident.
+  -		When set to `False`, erased files will be permanently deleted. Be careful as this offers no way to recover your deleted saves.
+  -		When unset, erased files will be preserved. Your deleted save files will be restored the next time you run AltLauncher. This is the default setting.
   - AltLauncher supports **environment variable expansion**, allowing dynamic resolution of paths:
 	-   `%USERPROFILE%` will automatically expand to `C:\Users\YourUsername`
 	-   `%LOCALAPPDATA%` expands to `C:\Users\YourUsername\AppData\Local`
