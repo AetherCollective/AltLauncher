@@ -2,9 +2,10 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.1.0.6
+#AutoIt3Wrapper_Res_Fileversion=0.1.0.7
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
+#AutoIt3Wrapper_Run_After=cmd /c echo Delay
 #AutoIt3Wrapper_Run_After=cmd /c echo %fileversion% > "%scriptdir%\VERSION"
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
@@ -170,8 +171,6 @@ EndFunc   ;==>Manage_Registry
 Func Manage_Directory($Mode, ByRef $Directories, ByRef $i)
 	Local $DirPath = $Directories[$i][1]
 	Local $BackupPath = $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Directories[$i][0]
-	$OriginalFileList = _FileListToArrayRec($DirPath, "*", $FLTAR_FILES, $FLTAR_RECUR)
-	$BackupFileList = _FileListToArrayRec($BackupPath, "*", $FLTAR_FILES, $FLTAR_RECUR)
 	If $Mode = "backup" Then
 		If Not FileExists($DirPath) Then DirCreate($DirPath)
 		If Not FileExists($BackupPath) Then DirCreate($BackupPath)
@@ -181,18 +180,29 @@ Func Manage_Directory($Mode, ByRef $Directories, ByRef $i)
 		If $ForbidDeletions = "True" Then
 			DirCopy($DirPath, $BackupPath, $FC_OVERWRITE)
 		Else
-			For $j = UBound($BackupFileList) - 1 To 1 Step -1
-				If _ArraySearch($OriginalFileList, $BackupFileList[$j]) <> -1 Then
-					_ArrayDelete($BackupFileList, $j)
-				Else
-					FileCopy($DirPath & '\' & $BackupFileList[$j], $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $BackupFileList[$j], $FC_OVERWRITE)
+			$GameFileList = _FileListToArrayRec($DirPath, "*", $FLTAR_FILES, $FLTAR_RECUR)
+			For $j = UBound($GameFileList) - 1 To 1 Step -1
+				FileCopy($DirPath & '\' & $GameFileList[$j], $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $GameFileList[$j], $FC_OVERWRITE + $FC_CREATEPATH)
+			Next
+			$ProfileFileList = _FileListToArrayRec($BackupPath, "*", $FLTAR_FILES, $FLTAR_RECUR)
+			For $j = UBound($ProfileFileList) - 1 To 1 Step -1
+				If _ArraySearch($GameFileList, $ProfileFileList[$j]) <> -1 Then
+					_ArrayDelete($ProfileFileList, $j)
 				EndIf
 			Next
-			For $j = 1 To UBound($BackupFileList) - 1
-				FileDelete($ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $BackupFileList[$j])
+			For $j = UBound($ProfileFileList) - 1 To 1 Step -1
+				FileRecycle($ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $ProfileFileList[$j])
+			Next
+			$FolderCleanupList = _FileListToArrayRec($BackupPath, "*", $FLTA_FOLDERS, $FLTAR_RECUR)
+			For $j = UBound($FolderCleanupList) - 1 To 1 Step -1
+				$SubFolder = $BackupPath & $FolderCleanupList[$j]
+				_FileListToArrayRec($SubFolder, "*", $FLTA_FILESFOLDERS, $FLTAR_RECUR)
+				If @extended = 9 Then
+					DirRemove($SubFolder)
+				EndIf
 			Next
 		EndIf
-		DirRemove($DirPath, $DIR_REMOVE)
+		FileRecycle($DirPath)
 		DirMove($DirPath & '.AltLauncher-Backup', $DirPath)
 	EndIf
 EndFunc   ;==>Manage_Directory
@@ -206,7 +216,7 @@ Func Manage_File($Mode, ByRef $Files, ByRef $i)
 		If $ForbidDeletions = "true" Then
 			FileMove($FilePath, $BackupPath, $FC_OVERWRITE + $FC_CREATEPATH)
 		Else
-			FileDelete($BackupPath)
+			FileRecycle($BackupPath)
 		EndIf
 		FileMove($FilePath & '.AltLauncher-Backup', $FilePath, $FC_OVERWRITE + $FC_CREATEPATH)
 	EndIf
