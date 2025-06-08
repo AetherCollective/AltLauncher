@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.1.0.10
+#AutoIt3Wrapper_Res_Fileversion=0.1.0.11
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Run_After=cmd /c echo %fileversion% > "%scriptdir%\VERSION"
@@ -17,7 +17,6 @@ Global $Title = "AltLauncher"
 RegisterVariables()
 If RegRead("HKCU\Environment", "AltLauncher_Path") = "" Then Setup()
 ReadConfig()
-ProcessCMDLine()
 ProcessConfig()
 CheckIfAlreadyRunning()
 If CheckStateFile() = True Then RepairState()
@@ -59,16 +58,14 @@ Func ReadConfig()
 	Global $UseRecyclingBin = IniRead($Ini, "Settings", "UseRecyclingBin", (RegRead("HKCU\Environment", "AltLauncher_UseRecyclingBin") <> "") ? RegRead("HKCU\Environment", "AltLauncher_UseRecyclingBin") : Null)
 	Global $ProfilesPath = IniRead($Ini, "Profiles", "Path", (RegRead("HKCU\Environment", "AltLauncher_Path") <> "") ? RegRead("HKCU\Environment", "AltLauncher_Path") : "C:\AltLauncher")
 	Global $ProfilesSubPath = IniRead($Ini, "Profiles", "SubPath", RegRead("HKCU\Environment", "AltLauncher_SubPath"))
+	Global $Profile = FileRead($ProfilesPath & "\Selected Profile.txt")
+	If $Profile = "" Then ExitMSG("Fronting File not set at " & $ProfilesPath & "\Selected Profile.txt")
 EndFunc   ;==>ReadConfig
 Func ProcessConfig()
 	Global $Registry = ReadINISection($Ini, "Registry")
 	Global $Directories = ReadINISection($Ini, "Directories")
 	Global $Files = ReadINISection($Ini, "Files")
 EndFunc   ;==>ProcessConfig
-Func ProcessCMDLine()
-	Global $Profile = (@Compiled And ($cmdlineraw <> "" And $cmdline[1] <> "--")) ? $cmdline[1] : FileRead($ProfilesPath & "\Selected Profile.txt")
-	If $Profile = "" Then ExitMSG("Fronting File not set at " & $ProfilesPath & "\Selected Profile.txt")
-EndFunc   ;==>ProcessCMDLine
 Func CreateProfileFolderIfEmpty()
 	DirCreate($ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name)
 EndFunc   ;==>CreateProfileFolderIfEmpty
