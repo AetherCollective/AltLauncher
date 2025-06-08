@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.1.0.8
+#AutoIt3Wrapper_Res_Fileversion=0.1.0.9
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Run_After=cmd /c echo %fileversion% > "%scriptdir%\VERSION"
@@ -15,6 +15,7 @@ Opt("ExpandEnvStrings", True)
 Global $Title = "AltLauncher"
 
 RegisterVariables()
+If EnvGet("AltLauncher_Path") = "" Then Setup()
 ReadConfig()
 ProcessCMDLine()
 ProcessConfig()
@@ -42,11 +43,11 @@ Func ReadINISection(ByRef $Ini, $Section)
 	Return $Data
 EndFunc   ;==>ReadINISection
 Func ReadConfig()
-	Global $Ini = @ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & ".ini"
+	Global $Ini = @ScriptDir & "\" & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".ini"
 	If Not FileExists($Ini) Then
-		$SearchResults = _FileListToArrayRec(@ScriptDir, StringTrimRight(@ScriptName, 4) & ".ini", $FLTAR_FILES, $FLTAR_RECUR)
-		If Not IsArray($SearchResults) Then ExitMSG("AltLauncher.ini not found.")
-		If $SearchResults[0] <> 1 Then ExitMSG("Multiple AltLauncher.ini found. Please remove all but one and try again.")
+		$SearchResults = _FileListToArrayRec(@ScriptDir, StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".ini", $FLTAR_FILES, $FLTAR_RECUR)
+		If Not IsArray($SearchResults) Then ExitMSG(StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".ini not found.")
+		If $SearchResults[0] <> 1 Then ExitMSG("Multiple " & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".ini found. Please remove all but one and try again.")
 		$Ini = @ScriptDir & "\" & $SearchResults[1]
 	EndIf
 	Global $Name = IniRead($Ini, "General", "Name", Null)
@@ -259,3 +260,36 @@ EndFunc   ;==>doExit
 Func ExitMSG($msg)
 	Exit MsgBox($MB_OK + $MB_ICONERROR + $MB_SYSTEMMODAL, "AltLauncher", $msg)
 EndFunc   ;==>ExitMSG
+Func Setup()
+	MsgBox(0, $Title, "Welcome to AltLauncher. Since this is the first time you've ran this program, we need to do some setup first." & @CRLF & @CRLF & "Click ok to proceed.")
+	MsgBox(0, $Title, "Please select where you want your save slots to be stored on the next window.")
+	RegWrite("HKCU\Environment", "AltLauncher_Path", "REG_SZ", FileSelectFolder($Title, "", $FSF_CREATEBUTTON, "C:\Profiles"))
+	RegWrite("HKCU\Environment", "AltLauncher_SubPath", "REG_SZ", InputBox($Title, "If you need to set up a sub-path, enter it now." & @CRLF & "If you don't need this, leave blank and click ok."))
+	Switch MsgBox(3, $Title, "Would you like to use the Recycling Bin when erasing a save slot?" & @CRLF & @CRLF & "Click 'Yes' to use the Recycling Bin." & @CRLF & "Click 'No' to permanently delete erased slots." & @CRLF & "Click 'Cancel' will preserve any erased save slots, restoring them on the next launch.")
+		Case $IDYES
+			RegWrite("HKCU\Environment", "AltLauncher_UseRecyclingBin", "REG_SZ", "True")
+		Case $IDNO
+			RegWrite("HKCU\Environment", "AltLauncher_UseRecyclingBin", "REG_SZ", "False")
+		Case $IDCANCEL
+			RegDelete("HKCU\Environment", "AltLauncher_UseRecyclingBin")
+	EndSwitch
+	$AutoDetectSteam3 = _FileListToArray("C:\Program Files (x86)\Steam\userdata", "*", $FLTA_FOLDERS)
+	If $AutoDetectSteam3[0] = 1 Then
+		RegWrite("HKCU\Environment", "Steam3", "REG_SZ", $AutoDetectSteam3[1])
+	Else
+		RegWrite("HKCU\Environment", "Steam3", "REG_SZ", InputBox($Title, "Enter your Steam3 ID." & @CRLF & @CRLF & "You can get your Steam3 at https://steamid.io/" & @CRLF))
+	EndIf
+	$AutoDetectSteam64 = _FileListToArray("C:\Program Files (x86)\Steam\config\avatarcache", "*", $FLTA_Files)
+	If $AutoDetectSteam64[0] = 1 Then
+		RegWrite("HKCU\Environment", "Steam64", "REG_SZ", StringLeft($AutoDetectSteam64[1], StringInStr($AutoDetectSteam64[1], ".", 0, -1) - 1))
+	Else
+		RegWrite("HKCU\Environment", "Steam64", "REG_SZ", InputBox($Title, "Enter your Steam64 ID." & @CRLF & @CRLF & "You can get your Steam64 at https://steamid.io/" & @CRLF))
+	EndIf
+	$AutoDetectUbisoftID = _FileListToArray("C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames", "*", $FLTA_FOLDERS)
+	If $AutoDetectUbisoftID[0] = 1 Then
+		RegWrite("HKCU\Environment", "UbisoftID", "REG_SZ", $AutoDetectUbisoftID[1])
+	Else
+		RegWrite("HKCU\Environment", "UbisoftID", "REG_SZ", InputBox($Title, "Enter your Ubisoft ID." & @CRLF & @CRLF & "Consult the readme.md on how to obtain this." & @CRLF))
+	EndIf
+	Exit MsgBox(0, $Title, "Setup Complete. Please sign out of Windows and log back in before using AltLauncher.")
+EndFunc   ;==>Setup
