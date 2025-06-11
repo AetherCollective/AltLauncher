@@ -15,6 +15,7 @@ Opt("ExpandEnvStrings", True)
 Global $Title = "AltLauncher"
 
 RegisterVariables()
+AttemptEnvironmentFixes()
 If RegRead("HKCU\Environment", "AltLauncher_Path") = "" Then Setup()
 ReadConfig()
 ProcessConfig()
@@ -41,6 +42,11 @@ Func ReadINISection(ByRef $Ini, $Section)
 	EndIf
 	Return $Data
 EndFunc   ;==>ReadINISection
+func AttemptEnvironmentFixes()
+	EnvSet("SteamID3",RegRead("HKCU\Environment", "SteamID3"))
+	EnvSet("SteamID64",RegRead("HKCU\Environment", "SteamID64"))
+	EnvSet("UbisoftID",RegRead("HKCU\Environment", "UbisoftID"))
+EndFunc
 Func ReadConfig()
 	Global $Ini = @ScriptDir & "\" & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".ini"
 	If Not FileExists($Ini) Then
@@ -179,7 +185,7 @@ Func Manage_Directory($Mode, ByRef $Directories, ByRef $i)
 		Else
 			$GameFileList = _FileListToArrayRec($DirPath, "*", $FLTAR_FILES, $FLTAR_RECUR)
 			For $j = UBound($GameFileList) - 1 To 1 Step -1
-				FileCopy($DirPath & '\' & $GameFileList[$j], $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $GameFileList[$j], $FC_OVERWRITE + $FC_CREATEPATH)
+				FileCopy($DirPath & '\' & $GameFileList[$j], $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Directories[$i][0] & '\' & $GameFileList[$j], $FC_OVERWRITE + $FC_CREATEPATH)
 			Next
 			$ProfileFileList = _FileListToArrayRec($BackupPath, "*", $FLTAR_FILES, $FLTAR_RECUR)
 			For $j = UBound($ProfileFileList) - 1 To 1 Step -1
@@ -189,9 +195,9 @@ Func Manage_Directory($Mode, ByRef $Directories, ByRef $i)
 			Next
 			For $j = UBound($ProfileFileList) - 1 To 1 Step -1
 				If $UseRecyclingBin = "False" Then
-					FileDelete($ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $ProfileFileList[$j])
+					FileDelete($ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Directories[$i][0] & '\' & $ProfileFileList[$j])
 				Else
-					FileRecycle($ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $ProfileFileList[$j])
+					FileRecycle($ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Directories[$i][0] & '\' & $ProfileFileList[$j])
 				EndIf
 			Next
 			$FolderCleanupList = _FileListToArrayRec($BackupPath, "*", $FLTA_FOLDERS, $FLTAR_RECUR)
