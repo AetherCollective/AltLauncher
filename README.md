@@ -175,3 +175,11 @@ AltLauncher comes with an auto-updater program that can act as a drop-in replace
 -   If the game fails to launch, verify that the `Executable` entry matches the correct `.exe` file.
 -   If profiles are not loading correctly, check the `ProfilesPath` for missing directories.
 -   If all else fails, we have a [Discord](https://discord.gg/zVAa2vkU5M) server where you can receive support! 
+
+## Screenshots
+
+
+![AltLauncher](https://github.com/user-attachments/assets/5f72428a-ecc9-4ad5-ac4e-85fa006f897c)
+![AltSetter](https://github.com/user-attachments/assets/30dedf93-d374-4a71-a013-7c0338f9d0bf)
+![Steam](https://github.com/user-attachments/assets/1d99c311-326f-440c-86b3-9960744a730d)
+[![Running](https://img.youtube.com/vi/dk0EhCbnRkw/0.jpg)](https://www.youtube.com/watch?v=dk0EhCbnRkw)
