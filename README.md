@@ -21,14 +21,14 @@ YouTube Video: https://www.youtube.com/watch?v=l9H_WKFcTcQ
 
 ## Installation & Setup
 
-### 1. Moving AltLauncher to the Game Directory
+#### 1. Moving AltLauncher to the Game Directory
 To ensure proper functionality:
 
 -   Place `AltLauncher.exe` and `AltLauncher.ini` inside the game’s main directory. 
 -   If you wish to use the auto-updater, you should also place `AltLauncher.Updater.exe` inside the game's main directory too.
 -   The executable should reside in the same folder as the game's primary `.exe` file.
 
-### 2. Configuring `AltLauncher.ini`
+#### 2. Configuring AltLauncher.ini
 The **AltLauncher.ini** file dictates the behavior of the launcher. You will need to gather the necessary registry paths, directory locations, and file dependencies.
 
 To correctly populate `AltLauncher.ini`, consult **PCGamingWiki**:
@@ -40,9 +40,18 @@ To correctly populate `AltLauncher.ini`, consult **PCGamingWiki**:
 
 Before you do all the hard work yourself, see if there's an AltLauncher.ini for your game in the [Templates](https://github.com/AetherCollective/AltLauncher/tree/main/Templates/) area. 
 
-------
+#### 3. Set up your Environment Paths
 
-### The AltLauncher.ini File
+  - It is recommended to set the `%AltLauncher_Path%` to point to where you want your save files to be stored. 
+    - By default, this is `C:\Alters`, but you could set it to any cloud-synced folder if you wish.
+  - You may also want to set the `%AltLauncher_SubPath%` if you desire a certain sub-folder structure. 
+    - For example: a subpath value of `Files\GameSaves` with the default path would resolve to `C:\Alters\<ProfileName>\Files\GameSaves`. By default, this is blank.
+
+#### 4. Utility Program - AltSetter
+
+AltSetter is a utility program to select a profile that can be used instead of the command line option. You should place it inside the directory you set for `%AltLauncher_Path%`. Using this program sets the `%AltLauncher_Path%\Selected_Profile.txt` file.
+
+## The AltLauncher.ini File
 
 Here are key fields that require user configuration:
 
@@ -128,19 +137,6 @@ saves=C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames\4dd63af8-27
 6898594.save=C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames\4dd63af8-2773-4b68-a6bb-22498c58d514\4502\6898594.save
 119004278.save=C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames\4dd63af8-2773-4b68-a6bb-22498c58d514\4502\119004278.save
 ```
-
-### 3. Set up your Environment Paths
-
-  - It is recommended to set the `%AltLauncher_Path%` to point to where you want your save files to be stored. 
-    - By default, this is `C:\Alters`, but you could set it to any cloud-synced folder if you wish.
-  - You may also want to set the `%AltLauncher_SubPath%` if you desire a certain sub-folder structure. 
-    - For example: a subpath value of `Files\GameSaves` with the default path would resolve to `C:\Alters\<ProfileName>\Files\GameSaves`. By default, this is blank.
-
-### 4. Utility Program - AltSetter
-
-AltSetter is a utility program to select a profile that can be used instead of the command line option. You should place it inside the directory you set for `%AltLauncher_Path%`. Using this program sets the `%AltLauncher_Path%\Selected_Profile.txt` file.
-
-------
 
 ## Usage Workflow
 1.  **Launch AltLauncher** via `AltLauncher.exe` or command-line.
