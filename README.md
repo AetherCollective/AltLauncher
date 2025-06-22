@@ -15,10 +15,11 @@ YouTube Video: https://www.youtube.com/watch?v=l9H_WKFcTcQ
    4. [Utility Program - AltSetter](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#4-command-line-usage)
 2. [The AltLauncher File](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#the-altlauncherini-file)
 3. [Usage Workflow](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#usage-workflow)
-4. [Auto-Updater](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#auto-updater)
-5. [Troubleshooting](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#troubleshooting)
-6. [Known Issues](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#known-issues)
-7. [Screenshots](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#screenshots)
+4. [Command Line Usage](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#command-line-usage)
+5. [Auto-Updater](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#auto-updater)
+6. [Troubleshooting](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#troubleshooting)
+7. [Known Issues](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#known-issues)
+8. [Screenshots](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#screenshots)
 
 ## Installation & Setup
 
@@ -146,7 +147,7 @@ saves=C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames\4dd63af8-27
 4.  The game launches, and AltLauncher monitors its process.
 5.  Once the game closes, AltLauncher restores settings and exits gracefully.
 
-## Command-Line Usage
+## Command Line Usage
 AltLauncher can be executed with command-line parameters:
 
 ```
@@ -159,7 +160,7 @@ AltLauncher.exe "ProfileName"
 -   If you do not define a profile, it will check the `%AltLauncher_Path%\Selected_Profile.txt` file and use it's value. If this file is missing or is invalid, you will receive an error.
 
 ## Auto-Updater
-AltLauncher comes with an auto-updater program that can act as a drop-in replacement for AltLauncher. It will automatically update AltLauncher to the latest version before execution. If you wish to use as a drop-in replacement, just update your shortcut/launcher to launch `AltLauncher.Updater.exe` instead of `AltLauncher.exe`
+AltLauncher comes with an auto updater program that can act as a drop-in replacement for AltLauncher. It will automatically update AltLauncher to the latest version before execution. If you wish to use as a drop-in replacement, just update your shortcut/launcher to launch `AltLauncher.Updater.exe` instead of `AltLauncher.exe`
 
 ## Tips
   - On Steam, you can modify the launch options to run the game through AltLauncher:
