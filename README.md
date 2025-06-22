@@ -1,12 +1,29 @@
 # AltLauncher Documentation
 
 ## Introduction
-
 **AltLauncher** is a utility designed to streamline the launching and profile management of games by handling registry modifications, directory adjustments, and file operations. This documentation will guide users through setting up and configuring AltLauncher for use with their preferred games.
 
 YouTube Video: https://www.youtube.com/watch?v=l9H_WKFcTcQ
 
 [![YouTube Video](https://img.youtube.com/vi/l9H_WKFcTcQ/maxresdefault.jpg)](https://www.youtube.com/watch?v=l9H_WKFcTcQ)
+
+## Table Of Contents
+1. [Installation & Setup](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#installation--setup)
+   1. [Moving AltLauncher to the Game Directory](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#1-moving-altlauncher-to-the-game-directory)
+
+   2. [Configuring AltLauncher.ini](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#2-configuring-altlauncherini)
+
+   3. [Set up your Environment Paths](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#3-set-up-your-environment-paths)
+
+   4. [Command-Line Usage](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#4-command-line-usage)
+
+   5. [Utility Program - AltSetter](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#4-command-line-usage)
+
+2. [Usage Workflow](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#usage-workflow)
+3. [Auto-Updater](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#auto-updater)
+4. [Troubleshooting](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#troubleshooting)
+5. [Known Issues](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#known-issues)
+6. [Screenshots](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#screenshots)
 
 ## Installation & Setup
 
@@ -29,7 +46,20 @@ To correctly populate `AltLauncher.ini`, consult **PCGamingWiki**:
 
 Before you do all the hard work yourself, see if there's an AltLauncher.ini for your game in the [Templates](https://github.com/AetherCollective/AltLauncher/tree/main/Templates/) area.
 
-#### Structure of `AltLauncher.ini`
+### 3. Set up your Environment Paths
+
+  - It is recommended to set the `%AltLauncher_Path%` to point to where you want your save files to be stored. 
+    - By default, this is `C:\Alters`, but you could set it to any cloud-synced folder if you wish.
+  - You may also want to set the `%AltLauncher_SubPath%` if you desire a certain sub-folder structure. 
+    - For example: a subpath value of `Files\GameSaves` with the default path would resolve to `C:\Alters\<ProfileName>\Files\GameSaves`. By default, this is blank.
+
+### 4. Utility Program - AltSetter
+
+AltSetter is a utility program to select a profile that can be used instead of the command line option. You should place it inside the directory you set for `%AltLauncher_Path%`. Using this program sets the `%AltLauncher_Path%\Selected_Profile.txt` file.
+
+------
+
+### Structure of `AltLauncher.ini`
 Here are key fields that require user configuration:
 
 **General Settings**
@@ -55,7 +85,7 @@ MinWait=5
 MaxWait=10
 ```
 
--   **`MinWait` / `MaxWait`**: Defines how long AltLauncher waits before confirming the game has closed.
+-   **`MinWait` / `MaxWait`**: Overrides how long AltLauncher waits before confirming the game has closed.
 
 **Profile Management**
 
@@ -112,13 +142,14 @@ saves=C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames\4dd63af8-27
 119004278.save=C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames\4dd63af8-2773-4b68-a6bb-22498c58d514\4502\119004278.save
 ```
 
-### 3. Set up your Environment Paths
-  - It is recommended to set the `%AltLauncher_Path%` to point to where you want your save files to be stored. 
-	  - By default, this is `C:\Alters`, but you could set it to any cloud-synced folder if you wish.
-  - You may also want to set the `%AltLauncher_SubPath%` if you desire a certain sub-folder structure. 
-	  - For example: a subpath value of `Files\GameSaves` with the default path would resolve to `C:\Alters\<ProfileName>\Files\GameSaves`. By default, this is blank.
+## Usage Workflow
+1.  **Launch AltLauncher** via `AltLauncher.exe` or command-line.
+2.  The script will process the configuration, registry settings, and profile data.
+3.  If necessary, it will back up files before launching the game.
+4.  The game launches, and AltLauncher monitors its process.
+5.  Once the game closes, AltLauncher restores settings and exits gracefully.
 
-### 4. Command-Line Usage
+## Command-Line Usage
 AltLauncher can be executed with command-line parameters:
 
 ```
@@ -128,17 +159,7 @@ AltLauncher.exe "ProfileName"
 
 -   Replace `"ProfileName"` with the desired profile folder name.
 -   When running from a script or batch file, ensure the profile name matches one present in the `Profiles` directory.
-- If you do not define a profile, it will check the `%AltLauncher_Path%\Selected_Profile.txt` file and use it's value. If this file is missing or is invalid, you will receive an error.
-
-### 5. Utility Program - AltSetter
-AltSetter is a utility program to select a profile that can be used instead of the command line option. You should place it inside the directory you set for `%AltLauncher_Path%`. Using this program sets the `%AltLauncher_Path%\Selected_Profile.txt` file.
-
-## Usage Workflow
-1.  **Launch AltLauncher** via `AltLauncher.exe` or command-line.
-2.  The script will process the configuration, registry settings, and profile data.
-3.  If necessary, it will back up files before launching the game.
-4.  The game launches, and AltLauncher monitors its process.
-5.  Once the game closes, AltLauncher restores settings and exits gracefully.
+-   If you do not define a profile, it will check the `%AltLauncher_Path%\Selected_Profile.txt` file and use it's value. If this file is missing or is invalid, you will receive an error.
 
 ## Auto-Updater
 AltLauncher comes with an auto-updater program that can act as a drop-in replacement for AltLauncher. It will automatically update AltLauncher to the latest version before execution. If you wish to use as a drop-in replacement, just update your shortcut/launcher to launch `AltLauncher.Updater.exe` instead of `AltLauncher.exe`
