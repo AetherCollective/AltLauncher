@@ -13,11 +13,12 @@ YouTube Video: https://www.youtube.com/watch?v=l9H_WKFcTcQ
    2. [Configuring AltLauncher.ini](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#2-configuring-altlauncherini)
    3. [Set up your Environment Paths](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#3-set-up-your-environment-paths)
    4. [Utility Program - AltSetter](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#4-command-line-usage)
-2. [Usage Workflow](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#usage-workflow)
-3. [Auto-Updater](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#auto-updater)
-4. [Troubleshooting](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#troubleshooting)
-5. [Known Issues](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#known-issues)
-6. [Screenshots](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#screenshots)
+2. [The AltLauncher File](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#the-altlauncherini-file)
+3. [Usage Workflow](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#usage-workflow)
+4. [Auto-Updater](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#auto-updater)
+5. [Troubleshooting](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#troubleshooting)
+6. [Known Issues](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#known-issues)
+7. [Screenshots](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#screenshots)
 
 ## Installation & Setup
 
@@ -36,7 +37,7 @@ To correctly populate `AltLauncher.ini`, consult **PCGamingWiki**:
 1.  Search for your game on [PCGamingWiki](https://www.pcgamingwiki.com).
 2.  Locate registry paths, save file locations, and configuration directories.
 3.  Use the provided information to define your `AltLauncher.ini` settings.
-    - See [The AltLauncher.ini File](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#structure-of-altlauncherini) for more info.
+    - See [The AltLauncher.ini File](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#the-altlauncherini-file) for more info.
 
 Before you do all the hard work yourself, see if there's an AltLauncher.ini for your game in the [Templates](https://github.com/AetherCollective/AltLauncher/tree/main/Templates/) area. 
 
