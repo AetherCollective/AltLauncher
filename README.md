@@ -10,15 +10,9 @@ YouTube Video: https://www.youtube.com/watch?v=l9H_WKFcTcQ
 ## Table Of Contents
 1. [Installation & Setup](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#installation--setup)
    1. [Moving AltLauncher to the Game Directory](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#1-moving-altlauncher-to-the-game-directory)
-
    2. [Configuring AltLauncher.ini](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#2-configuring-altlauncherini)
-
    3. [Set up your Environment Paths](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#3-set-up-your-environment-paths)
-
-   4. [Command-Line Usage](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#4-command-line-usage)
-
-   5. [Utility Program - AltSetter](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#4-command-line-usage)
-
+   4. [Utility Program - AltSetter](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#4-command-line-usage)
 2. [Usage Workflow](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#usage-workflow)
 3. [Auto-Updater](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#auto-updater)
 4. [Troubleshooting](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#troubleshooting)
@@ -37,29 +31,19 @@ To ensure proper functionality:
 ### 2. Configuring `AltLauncher.ini`
 The **AltLauncher.ini** file dictates the behavior of the launcher. You will need to gather the necessary registry paths, directory locations, and file dependencies.
 
-#### Obtaining Paths
 To correctly populate `AltLauncher.ini`, consult **PCGamingWiki**:
 
 1.  Search for your game on [PCGamingWiki](https://www.pcgamingwiki.com).
 2.  Locate registry paths, save file locations, and configuration directories.
 3.  Use the provided information to define your `AltLauncher.ini` settings.
+    - See [The AltLauncher.ini File](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#structure-of-altlauncherini) for more info.
 
-Before you do all the hard work yourself, see if there's an AltLauncher.ini for your game in the [Templates](https://github.com/AetherCollective/AltLauncher/tree/main/Templates/) area.
-
-### 3. Set up your Environment Paths
-
-  - It is recommended to set the `%AltLauncher_Path%` to point to where you want your save files to be stored. 
-    - By default, this is `C:\Alters`, but you could set it to any cloud-synced folder if you wish.
-  - You may also want to set the `%AltLauncher_SubPath%` if you desire a certain sub-folder structure. 
-    - For example: a subpath value of `Files\GameSaves` with the default path would resolve to `C:\Alters\<ProfileName>\Files\GameSaves`. By default, this is blank.
-
-### 4. Utility Program - AltSetter
-
-AltSetter is a utility program to select a profile that can be used instead of the command line option. You should place it inside the directory you set for `%AltLauncher_Path%`. Using this program sets the `%AltLauncher_Path%\Selected_Profile.txt` file.
+Before you do all the hard work yourself, see if there's an AltLauncher.ini for your game in the [Templates](https://github.com/AetherCollective/AltLauncher/tree/main/Templates/) area. 
 
 ------
 
-### Structure of `AltLauncher.ini`
+### The AltLauncher.ini File
+
 Here are key fields that require user configuration:
 
 **General Settings**
@@ -94,6 +78,7 @@ MaxWait=10
 Path=%USERPROFILE%\Documents\AltLauncher
 SubPath=Saves
 ```
+
 -   Overrides where the game's save files are stored on a per-game basis.
 -   **`Path`**: Location where AltLauncher stores profile-related files.
 -   **`SubPath`**: Subdirectory where game-specific profiles reside.
@@ -103,44 +88,59 @@ SubPath=Saves
 Each entry for **Registry**, **Directories**, and **Files** follows a **key=value** mapping. 
 
 The key is the user-preference unique name of the .reg file, Directory, or File and will be mapped to 
+
 ```ini
 %AltLauncher_Path%\<ProfileName>\%AltLauncher_SubPath%\%Name%
 ```
--   **%Name%**  refers to the Name field in `AltLauncher.ini`Directories
+
+-   **%Name%**  refers to the Name field in `AltLauncher.ini`.
 
 The value is the path of the registry, directory, or file your game needs to map. This could be a folder leading to where your game's savedata is, or a configuration file. You could even decide to map each individual file slot (if your game stores their slots in separate files). 
 
-**Registry**
+**Registry Examples:**
 
-##### Examples: 
 ```ini
 Registry=HKEY_CURRENT_USER\Software\Burst2flame Entertainment\Stolen Realm
 ```
+
 ```ini
 HKLM=HKEY_LOCAL_MACHINE\SOFTWARE\Wizards of the Coast\MTGArena
 HKCU=HKEY_CURRENT_USER\Software\Wizards Of The Coast\MTGA
 ```
 
-###### HKEY_LOCAL_MACHINE paths requires you to run AltLauncher as an Administrator.
+> HKEY_LOCAL_MACHINE paths requires you to run AltLauncher as an Administrator.
 
-**Directories**
+##### Directories Examples:
 
 Directories can have an empty key field, which will use the root folder of `%AltLauncher_Path%\<ProfileName>\%AltLauncher_SubPath%\%Name%`. Useful if your game stores all its save files in a single directory.
 
-##### Examples:
 ```ini
 =C:\Program Files (x86)\Steam\userdata\1101577702\1798020
 ```
+
 ```ini
 saves=C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames\4dd63af8-2773-4b68-a6bb-22498c58d514\4502
 ```
 
-**Files**
-##### Examples:
+**File Examples:**
+
 ```ini
 6898594.save=C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames\4dd63af8-2773-4b68-a6bb-22498c58d514\4502\6898594.save
 119004278.save=C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames\4dd63af8-2773-4b68-a6bb-22498c58d514\4502\119004278.save
 ```
+
+### 3. Set up your Environment Paths
+
+  - It is recommended to set the `%AltLauncher_Path%` to point to where you want your save files to be stored. 
+    - By default, this is `C:\Alters`, but you could set it to any cloud-synced folder if you wish.
+  - You may also want to set the `%AltLauncher_SubPath%` if you desire a certain sub-folder structure. 
+    - For example: a subpath value of `Files\GameSaves` with the default path would resolve to `C:\Alters\<ProfileName>\Files\GameSaves`. By default, this is blank.
+
+### 4. Utility Program - AltSetter
+
+AltSetter is a utility program to select a profile that can be used instead of the command line option. You should place it inside the directory you set for `%AltLauncher_Path%`. Using this program sets the `%AltLauncher_Path%\Selected_Profile.txt` file.
+
+------
 
 ## Usage Workflow
 1.  **Launch AltLauncher** via `AltLauncher.exe` or command-line.
