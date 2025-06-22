@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.1.0.11
+#AutoIt3Wrapper_Res_Fileversion=0.1.0.12
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Run_After=cmd /c echo %fileversion% > "%scriptdir%\VERSION"
@@ -15,9 +15,10 @@ Opt("ExpandEnvStrings", True)
 Global $Title = "AltLauncher"
 
 RegisterVariables()
-AttemptEnvironmentFixes()
+ReadEnvironmentVariables()
 If RegRead("HKCU\Environment", "AltLauncher_Path") = "" Then Setup()
 ReadConfig()
+ProcessCMDLine()
 ProcessConfig()
 CheckIfAlreadyRunning()
 If CheckStateFile() = True Then RepairState()
@@ -42,11 +43,11 @@ Func ReadINISection(ByRef $Ini, $Section)
 	EndIf
 	Return $Data
 EndFunc   ;==>ReadINISection
-func AttemptEnvironmentFixes()
-	EnvSet("SteamID3",RegRead("HKCU\Environment", "SteamID3"))
-	EnvSet("SteamID64",RegRead("HKCU\Environment", "SteamID64"))
-	EnvSet("UbisoftID",RegRead("HKCU\Environment", "UbisoftID"))
-EndFunc
+Func ReadEnvironmentVariables()
+	EnvSet("SteamID3", RegRead("HKCU\Environment", "SteamID3"))
+	EnvSet("SteamID64", RegRead("HKCU\Environment", "SteamID64"))
+	EnvSet("UbisoftID", RegRead("HKCU\Environment", "UbisoftID"))
+EndFunc   ;==>ReadEnvironmentVariables
 Func ReadConfig()
 	Global $Ini = @ScriptDir & "\" & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".ini"
 	If Not FileExists($Ini) Then
@@ -72,6 +73,10 @@ Func ProcessConfig()
 	Global $Directories = ReadINISection($Ini, "Directories")
 	Global $Files = ReadINISection($Ini, "Files")
 EndFunc   ;==>ProcessConfig
+Func ProcessCMDLine()
+	Global $Profile = (@Compiled And ($CmdLine[0] >= 1 And $CmdLine[1] <> "--")) ? $CmdLine[1] : FileRead($ProfilesPath & "\Selected Profile.txt")
+	If $Profile = "" Then ExitMSG("Fronting File not set at " & $ProfilesPath & "\Selected Profile.txt")
+EndFunc   ;==>ProcessCMDLine
 Func CreateProfileFolderIfEmpty()
 	DirCreate($ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name)
 EndFunc   ;==>CreateProfileFolderIfEmpty
