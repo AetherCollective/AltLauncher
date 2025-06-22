@@ -12,7 +12,7 @@ YouTube Video: https://www.youtube.com/watch?v=l9H_WKFcTcQ
    1. [Moving AltLauncher to the Game Directory](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#1-moving-altlauncher-to-the-game-directory)
    2. [Configuring AltLauncher.ini](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#2-configuring-altlauncherini)
    3. [Set up your Environment Paths](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#3-set-up-your-environment-paths)
-   4. [Utility Program - AltSetter](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#4-command-line-usage)
+   4. [Utility Program - AltSetter](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#4-utility-program---altsetter)
 2. [The AltLauncher File](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#the-altlauncherini-file)
 3. [Usage Workflow](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#usage-workflow)
 4. [Command Line Usage](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#command-line-usage)
