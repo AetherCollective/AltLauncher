@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltSetter.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.1.0.0
+#AutoIt3Wrapper_Res_Fileversion=0.1.0.1
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
@@ -13,6 +13,8 @@
 #include <Math.au3>
 Opt("GUIOnEventMode", True)
 Opt("TrayIconHide", True)
+
+$Profile = FileRead(@ScriptDir & "\Selected Profile.txt")
 
 ; Check for launch flag
 If $CmdLine[0] > 0 Then
@@ -37,7 +39,7 @@ Local $iButtonHeight = 60
 
 ; Calculate window size based on number of buttons
 Local $iNumColumns = Ceiling($aFolders[0] / $iMaxButtonsPerColumn)
-Local $iNumRows = _Min($aFolders[0],$iMaxButtonsPerColumn)
+Local $iNumRows = _Min($aFolders[0], $iMaxButtonsPerColumn)
 Local $iWindowWidth = $iNumColumns * ($iButtonWidth + $iButtonSpacing) + $iButtonSpacing + $iButtonSpacing + 2
 Local $iWindowHeight = ($iNumRows + 1) * ($iButtonHeight + $iButtonSpacing) - ($iButtonHeight / 2)
 
@@ -48,8 +50,8 @@ GUISetOnEvent($GUI_EVENT_CLOSE, "_CloseGUI")
 Local $iX = $iButtonSpacing
 Local $iY = $iButtonSpacing
 For $i = 1 To $aFolders[0]
-	Local $hButton = GUICtrlCreateButton($aFolders[$i], $iX, $iY, $iButtonWidth, $iButtonHeight)
-	If GUICtrlSetOnEvent($hButton, "_ButtonClick") = 0 Then exit MsgBox(0, "Error", "Can't register 'click' event for " & $aFolders[$i] & @CRLF & "[button]:" & $hButton)
+	Local $hButton = GUICtrlCreateButton($aFolders[$i], $iX, $iY, $iButtonWidth, $iButtonHeight, $aFolders[$i] = $Profile ? $WS_BORDER + $WS_TABSTOP : $WS_TABSTOP)
+	If GUICtrlSetOnEvent($hButton, "_ButtonClick") = 0 Then Exit MsgBox(0, "Error", "Can't register 'click' event for " & $aFolders[$i] & @CRLF & "[button]:" & $hButton)
 
 	$iY += $iButtonHeight + $iButtonSpacing
 	If Mod($i, $iMaxButtonsPerColumn) = 0 Then
