@@ -168,6 +168,7 @@ AltLauncher comes with an auto-updater program that can act as a drop-in replace
   - If **AltLauncher.ini** is missing, ensure it's located in the same directory as `AltLauncher.exe`.
   - If the game fails to launch, verify that the `Executable` entry matches the correct `.exe` file.
   - If profiles are not loading correctly, check the `ProfilesPath` for missing directories.
+  - If save files are not being swapped out when changing profiles, check and make sure your directories are correctly mapped in `AltLauncher.ini`. See [Obtaining Paths](https://github.com/AetherCollective/AltLauncher?tab=readme-ov-file#obtaining-paths).
   - If all else fails, we have a [Discord](https://discord.gg/zVAa2vkU5M) server where you can receive support! 
 
 ## Known Issues
