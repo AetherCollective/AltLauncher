@@ -8,18 +8,18 @@ YouTube Video: https://www.youtube.com/watch?v=l9H_WKFcTcQ
 [![YouTube Video](https://img.youtube.com/vi/l9H_WKFcTcQ/maxresdefault.jpg)](https://www.youtube.com/watch?v=l9H_WKFcTcQ)
 
 ## Table Of Contents
-1. [Installation & Setup](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#installation--setup)
-   1. [Moving AltLauncher to the Game Directory](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#1-moving-altlauncher-to-the-game-directory)
-   2. [Configuring AltLauncher.ini](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#2-configuring-altlauncherini)
-   3. [Set up your Environment Paths](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#3-set-up-your-environment-paths)
-   4. [Utility Program - AltSetter](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#4-utility-program---altsetter)
-2. [The AltLauncher File](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#the-altlauncherini-file)
-3. [Usage Workflow](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#usage-workflow)
-4. [Command Line Usage](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#command-line-usage)
-5. [Auto-Updater](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#auto-updater)
-6. [Troubleshooting](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#troubleshooting)
-7. [Known Issues](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#known-issues)
-8. [Screenshots](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#screenshots)
+1. [Installation & Setup](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#installation--setup)
+   1. [Moving AltLauncher to the Game Directory](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#1-moving-altlauncher-to-the-game-directory)
+   2. [Configuring AltLauncher.ini](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#2-configuring-altlauncherini)
+   3. [Set up your Environment Paths](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#3-set-up-your-environment-paths)
+   4. [Utility Program - AltSetter](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#4-utility-program---altsetter)
+2. [The AltLauncher File](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#the-altlauncherini-file)
+3. [Usage Workflow](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#usage-workflow)
+4. [Command Line Usage](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#command-line-usage)
+5. [Auto-Updater](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#auto-updater)
+6. [Troubleshooting](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#troubleshooting)
+7. [Known Issues](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#known-issues)
+8. [Screenshots](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#screenshots)
 
 ## Installation & Setup
 
@@ -38,7 +38,7 @@ To correctly populate `AltLauncher.ini`, consult **PCGamingWiki**:
 1.  Search for your game on [PCGamingWiki](https://www.pcgamingwiki.com).
 2.  Locate registry paths, save file locations, and configuration directories.
 3.  Use the provided information to define your `AltLauncher.ini` settings.
-    - See [The AltLauncher.ini File](https://github.com/AetherCollective/AltLauncher/blob/main/README.md#the-altlauncherini-file) for more info.
+    - See [The AltLauncher.ini File](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#the-altlauncherini-file) for more info.
 
 Before you do all the hard work yourself, see if there's an AltLauncher.ini for your game in the [Templates](https://github.com/AetherCollective/AltLauncher/tree/main/Templates/) area. 
 
