@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.Updater.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.1.0.1
+#AutoIt3Wrapper_Res_Fileversion=0.1.0.2
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
@@ -11,22 +11,19 @@
 #include <MsgBoxConstants.au3>
 #include <InetConstants.au3>
 #include <StringConstants.au3>
-
-Global $versionUrl = "https://github.com/AetherCollective/AltLauncher/raw/refs/heads/main/VERSION" ; URL with the online version
+#include "Include\JSON.au3"
+Global $versionUrl = "https://api.github.com/repos/AetherCollective/AltLauncher/tags?per_page=1"
 Global $updateUrl = "https://github.com/AetherCollective/AltLauncher/releases/latest/download/AltLauncher.exe" ; URL for the new EXE
-
 Func GetOnlineVersion()
 	AdlibRegister("StallCheck", 5000)
-	$hDownload = InetGet($versionUrl, @TempDir & "\AltLauncher.VERSION", $INET_FORCERELOAD, $INET_DOWNLOADBACKGROUND)
+	$hDownload = InetGet($versionUrl, @TempDir & "\AltLauncher.json", $INET_FORCERELOAD, $INET_DOWNLOADBACKGROUND)
 	Do
 		Sleep(250)
 	Until InetGetInfo($hDownload, $INET_DOWNLOADCOMPLETE)
-
-	; Close the handle returned by InetGet.
 	InetClose($hDownload)
-	Local $onlineVersion = FileRead(@TempDir & "\AltLauncher.VERSION")
-	If @error Then ShellExecute(@ScriptDir & "\AltLauncher.exe", $cmdlineraw) ; Restart the application
-	Return StringStripCR(StringStripWS(BinaryToString($onlineVersion), $STR_STRIPALL))  ; Remove extra whitespace
+	Global $Json = _JSON_Parse(FileRead(@TempDir & "\AltLauncher.json"))
+	If @error Then ShellExecute(@ScriptDir & "\AltLauncher.exe", $cmdlineraw)
+	Return _Json_Get($Json, "[0].name")
 EndFunc   ;==>GetOnlineVersion
 Func IsNewerVersion($localVersion, $onlineVersion)
 	Local $localParts = StringSplit($localVersion, ".")
@@ -35,7 +32,7 @@ Func IsNewerVersion($localVersion, $onlineVersion)
 		If Number($onlineParts[$i]) > Number($localParts[$i]) Then Return True
 		If Number($onlineParts[$i]) < Number($localParts[$i]) Then Return False
 	Next
-	Return $onlineParts[0] > $localParts[0] ; Compare number of parts
+	Return $onlineParts[0] > $localParts[0]
 EndFunc   ;==>IsNewerVersion
 Func UpdateProgram()
 	Local $tempFile = @TempDir & "\AltLauncher.exe"
@@ -52,7 +49,6 @@ Func StallCheck()
 			AdlibRegister("StallCheck", 20000)
 	EndSwitch
 EndFunc   ;==>StallCheck
-
 Local $localVersion = FileGetVersion(@ScriptDir & "\AltLauncher.exe") ; Replace with your local version
 Local $onlineVersion = GetOnlineVersion()
 If IsNewerVersion($localVersion, $onlineVersion) Then UpdateProgram()
