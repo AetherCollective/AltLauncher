@@ -5,7 +5,6 @@
 #AutoIt3Wrapper_Res_Fileversion=0.1.0.12
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
-#AutoIt3Wrapper_Run_After=cmd /c echo %fileversion% > "%scriptdir%\VERSION"
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
 #include <File.au3>
