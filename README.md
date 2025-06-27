@@ -192,7 +192,7 @@ AltLauncher comes with an auto updater program that can act as a drop-in replace
   - If all else fails, we have a [Discord](https://discord.gg/zVAa2vkU5M) server where you can receive support! 
 
 ## Known Issues
-Xbox Games are probably not going to work without taking ownership of protected folders and forcibly disabling cloud sync. Support will not be provided for Xbox Games. Sorry!  
+Xbox App Games are probably not going to work without taking ownership of protected folders and forcibly disabling cloud sync. Support will not be provided for Xbox App Games. Sorry!  
 While traditional cloud syncing is supported and recommended, on-demand cloud syncing is not. Backups that normally generate at runtime do not get deleted properly when this feature is on. Please turn off this feature in your cloud syncing app, settings like `always available offline/locally` usually aren't enough:
 
   - OneDrive: Files On-Demand - [link](https://support.microsoft.com/en-us/office/save-disk-space-with-onedrive-files-on-demand-for-windows-0e6860d3-d9f3-4971-b321-7092438fb38e#ocpExpandoHeadTitleContainer:~:text=How%20to%20turn%20on%20Files%20on%20Demand)
