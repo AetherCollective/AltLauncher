@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.1.0.12
+#AutoIt3Wrapper_Res_Fileversion=0.1.0.13
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
@@ -181,15 +181,19 @@ Func Manage_Directory($Mode, ByRef $Directories, ByRef $i)
 	If $Mode = "backup" Then
 		If Not FileExists($DirPath) Then DirCreate($DirPath)
 		If Not FileExists($BackupPath) Then DirCreate($BackupPath)
-		DirMove($DirPath, $DirPath & '.AltLauncher-Backup', $FC_OVERWRITE)
-		DirCopy($BackupPath, $DirPath, $FC_OVERWRITE)
+		If DirMove($DirPath, $DirPath & '.AltLauncher-Backup', $FC_OVERWRITE) = 0 Then
+			If FileWriteLine(@ScriptDir & "\" & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".log", "Backup failed! " & $DirPath & @CRLF) = 0 Then MsgBox(0, "error", "Backup failed! " & $DirPath)
+		EndIf
+		If DirCopy($BackupPath, $DirPath, $FC_OVERWRITE) = 0 Then FileWriteLine(@ScriptDir & "\" & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".log", "Transfer to game failed! " & $BackupPath & "=>" & $DirPath & @CRLF)
 	ElseIf $Mode = "restore" Then
 		If $UseRecyclingBin = "True" Then
-			DirCopy($DirPath, $BackupPath, $FC_OVERWRITE)
+			If DirCopy($DirPath, $BackupPath, $FC_OVERWRITE) = 0 Then
+				FileWriteLine(@ScriptDir & "\" & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".log", "Transfer to game failed! " & $DirPath & "=>" & $BackupPath & @CRLF)
+			EndIf
 		Else
 			$GameFileList = _FileListToArrayRec($DirPath, "*", $FLTAR_FILES, $FLTAR_RECUR)
 			For $j = UBound($GameFileList) - 1 To 1 Step -1
-				FileCopy($DirPath & '\' & $GameFileList[$j], $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Directories[$i][0] & '\' & $GameFileList[$j], $FC_OVERWRITE + $FC_CREATEPATH)
+				If FileCopy($DirPath & '\' & $GameFileList[$j], $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Directories[$i][0] & '\' & $GameFileList[$j], $FC_OVERWRITE + $FC_CREATEPATH) = 0 Then FileWrite(@ScriptDir & "\" & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".log", "Transfer to profile failed! " & $DirPath & '\' & $GameFileList[$j] & "=>" & $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Directories[$i][0] & '\' & $GameFileList[$j] & @CRLF)
 			Next
 			$ProfileFileList = _FileListToArrayRec($BackupPath, "*", $FLTAR_FILES, $FLTAR_RECUR)
 			For $j = UBound($ProfileFileList) - 1 To 1 Step -1
@@ -214,7 +218,7 @@ Func Manage_Directory($Mode, ByRef $Directories, ByRef $i)
 		Else
 			FileRecycle($DirPath)
 		EndIf
-		DirMove($DirPath & '.AltLauncher-Backup', $DirPath)
+		If DirMove($DirPath & '.AltLauncher-Backup', $DirPath) = 0 Then FileWriteLine(@ScriptDir & "\" & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".log", "Restore Failed! " & $DirPath & @CRLF)
 	EndIf
 EndFunc   ;==>Manage_Directory
 Func Manage_File($Mode, ByRef $Files, ByRef $i)
