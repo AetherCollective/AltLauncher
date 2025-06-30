@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltSetter.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.1.0.2
+#AutoIt3Wrapper_Res_Fileversion=0.1.0.3
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
@@ -74,10 +74,18 @@ EndFunc   ;==>_CloseGUI
 
 ; Button click event handler
 Func _ButtonClick()
+	Local $restore = False
 	Local $sButtonText = GUICtrlRead(@GUI_CtrlId)
 	$hFile = FileOpen(@ScriptDir & "\Selected Profile.txt", 2)
+	If $hFile = -1 Then
+		$restore = True
+		$attrib = FileGetAttrib(@ScriptDir & "\Selected Profile.txt")
+		FileSetAttrib(@ScriptDir & "\Selected Profile.txt", "-H")
+		$hFile = FileOpen(@ScriptDir & "\Selected Profile.txt", 2)
+	EndIf
 	FileWrite($hFile, $sButtonText)
 	FileClose($hFile)
+	If $restore = True Then FileSetAttrib(@ScriptDir & "\Selected Profile.txt", "+" & $attrib)
 	If FileExists(@ScriptDir & "\" & $sButtonText & "\AltProfile.exe") Then
 		ProcessClose("alienfx-gui.exe")
 		ShellExecute(@ScriptDir & "\" & $sButtonText & "\AltProfile.exe")
