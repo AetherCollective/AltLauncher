@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.Updater.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.1.0.2
+#AutoIt3Wrapper_Res_Fileversion=0.1.0.3
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
@@ -22,7 +22,7 @@ Func GetOnlineVersion()
 	Until InetGetInfo($hDownload, $INET_DOWNLOADCOMPLETE)
 	InetClose($hDownload)
 	Global $Json = _JSON_Parse(FileRead(@TempDir & "\AltLauncher.json"))
-	If @error Then ShellExecute(@ScriptDir & "\AltLauncher.exe", $cmdlineraw)
+	If @error Then Exit ShellExecute(@ScriptDir & "\AltLauncher.exe", $cmdlineraw)
 	Return _Json_Get($Json, "[0].name")
 EndFunc   ;==>GetOnlineVersion
 Func IsNewerVersion($localVersion, $onlineVersion)
