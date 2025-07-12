@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltSetter.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.1.0.3
+#AutoIt3Wrapper_Res_Fileversion=0.1.0.5
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
@@ -87,7 +87,6 @@ Func _ButtonClick()
 	FileClose($hFile)
 	If $restore = True Then FileSetAttrib(@ScriptDir & "\Selected Profile.txt", "+" & $attrib)
 	If FileExists(@ScriptDir & "\" & $sButtonText & "\AltProfile.exe") Then
-		ProcessClose("alienfx-gui.exe")
 		ShellExecute(@ScriptDir & "\" & $sButtonText & "\AltProfile.exe")
 	EndIf
 	Exit
