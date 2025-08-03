@@ -176,11 +176,12 @@ AltLauncher comes with an auto updater program that can act as a drop-in replace
 	-   `%PROGRAMFILES%` expands to `C:\Program Files`
 	-   `%PROGRAMFILES(x86)%` expands to `C:\Program Files (x86)`
 	-   `%PROGRAMDATA%` expands to `C:\ProgramData`
-  - Set the environment paths `%SteamID3%`, `%SteamID64%`, and `%UbisoftID%` to your user-id. 
+  - Set the environment paths `%SteamID3%`, `%SteamID64%`, `%UbisoftID%`, and `%RockstarID%` to your user-id. 
 	  - You can obtain your user-id by checking the following directories: 
 		  - `C:\Program Files (x86)\Steam\userdata`
 		  - `C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames`
 	  - You can look up your `%SteamID64%` by visiting [steamid.io](https://steamid.io/)
+    - You can look up your `%RockstarID%` by checking the `%UserProfile%\OneDrive\Documents\Rockstar Games\<game>\Profiles` directory.
       ##### You can use these environment variables inside `AltLauncher.ini` for flexible path resolution.
 
 ## Troubleshooting
