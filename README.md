@@ -5,6 +5,8 @@
 
 YouTube Video: https://www.youtube.com/watch?v=l9H_WKFcTcQ
 
+![Downloads](https://img.shields.io/github/downloads/AetherCollective/AltLauncher/total.svg)
+
 [![YouTube Video](https://img.youtube.com/vi/l9H_WKFcTcQ/maxresdefault.jpg)](https://www.youtube.com/watch?v=l9H_WKFcTcQ)
 
 ## Table Of Contents
