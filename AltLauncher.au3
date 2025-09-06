@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.0
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.1
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
@@ -78,10 +78,10 @@ Func ReadConfig()
 		Switch $CmdLine[1]
 			Case "--"
 
-			Case "--select"
-				$Profile = ""
 			Case "--read"
 				$Profile = FileRead($ProfilesPath & "\Selected Profile.txt")
+			Case "--select"
+				$Profile = ""
 			Case Else
 				; Any other value is treated as a direct profile name
 				$Profile = $CmdLine[1]
