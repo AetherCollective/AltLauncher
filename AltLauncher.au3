@@ -2,21 +2,29 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.1.0.15
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.0
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
 #include <File.au3>
 #include <Misc.au3>
+#include <Math.au3>
+#include <GUIConstantsEx.au3>
+#include <WindowsConstants.au3>
+Opt("GUIOnEventMode", True)
 Opt("TrayIconHide", True)
 Opt("ExpandEnvStrings", True)
-Global $Title = "AltLauncher"
+Global $Title = "AltLauncher", $Profile_Set = False
 
 RegisterVariables()
 ReadEnvironmentVariables()
 If RegRead("HKCU\Environment", "AltLauncher_Path") = "" Then Setup()
 ReadConfig()
+GuiInit()
+Do
+	Sleep(100)
+Until $Profile_Set = True
 CheckIfAlreadyRunning()
 If CheckStateFile() = True Then RepairState()
 WriteStateFile()
@@ -45,6 +53,7 @@ Func ReadEnvironmentVariables()
 	EnvSet("SteamID64", RegRead("HKCU\Environment", "SteamID64"))
 	EnvSet("UbisoftID", RegRead("HKCU\Environment", "UbisoftID"))
 	EnvSet("RockstarID", RegRead("HKCU\Environment", "RockstarID"))
+	EnvSet("AltLauncher_UseProfileFile", RegRead("HKCU\Environment", "AltLauncher_UseProfileFile"))
 EndFunc   ;==>ReadEnvironmentVariables
 Func ReadConfig()
 	Global $Ini = @ScriptDir & "\" & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".ini"
@@ -63,12 +72,64 @@ Func ReadConfig()
 	Global $UseRecyclingBin = IniRead($Ini, "Settings", "UseRecyclingBin", (RegRead("HKCU\Environment", "AltLauncher_UseRecyclingBin") <> "") ? RegRead("HKCU\Environment", "AltLauncher_UseRecyclingBin") : Null)
 	Global $ProfilesPath = IniRead($Ini, "Profiles", "Path", (RegRead("HKCU\Environment", "AltLauncher_Path") <> "") ? RegRead("HKCU\Environment", "AltLauncher_Path") : "C:\AltLauncher")
 	Global $ProfilesSubPath = IniRead($Ini, "Profiles", "SubPath", RegRead("HKCU\Environment", "AltLauncher_SubPath"))
-	Global $Profile = (@Compiled And ($CmdLine[0] >= 1 And $CmdLine[1] <> "--")) ? $CmdLine[1] : FileRead($ProfilesPath & "\Selected Profile.txt")
-	If $Profile = "" Then ExitMSG("Fronting File not set at " & $ProfilesPath & "\Selected Profile.txt")
+	Global $Profile = ""
+	If RegRead("HKCU\Environment", "AltLauncher_UseProfileFile") = "True" Then $Profile = FileRead($ProfilesPath & "\Selected Profile.txt")
+	If @Compiled And $CmdLine[0] >= 1 Then
+		Switch $CmdLine[1]
+			Case "--"
+
+			Case "--read"
+				$Profile = FileRead($ProfilesPath & "\Selected Profile.txt")
+			Case Else
+				; Any other value is treated as a direct profile name
+				$Profile = $CmdLine[1]
+		EndSwitch
+	EndIf
 	Global $Registry = ReadINISection($Ini, "Registry")
 	Global $Directories = ReadINISection($Ini, "Directories")
 	Global $Files = ReadINISection($Ini, "Files")
 EndFunc   ;==>ReadConfig
+Func GuiInit()
+	If $Profile <> "" Then
+		$Profile_Set = True
+		Return
+	EndIf
+	Local $aFolders = _FileListToArray($ProfilesPath, "*", $FLTA_FOLDERS)
+	If @error Then
+		Exit MsgBox(16, "Error", "No folders found in script directory.")
+	EndIf
+	Local Const $iSpacing = 4, $iMaxPerCol = 6, $iBtnW = 120, $iBtnH = 60
+	Local $iTotal = $aFolders[0]
+	Local $iCols = Ceiling($iTotal / $iMaxPerCol)
+	Local $iRows = _Min($iTotal, $iMaxPerCol)
+	Local $iWinW = $iCols * ($iBtnW + $iSpacing) + $iSpacing * 2 + 2
+	Local $iWinH = ($iRows + 1) * ($iBtnH + $iSpacing) - ($iBtnH / 2)
+	Local $hGUI = GUICreate("AltLauncher", $iWinW, $iWinH, -1, -1, $WS_SYSMENU)
+	GUISetOnEvent($GUI_EVENT_CLOSE, "_CloseGUI")
+	Local $iX = $iSpacing, $iY = $iSpacing
+	For $i = 1 To $iTotal
+		Local $sLabel = $aFolders[$i]
+		Local $iStyle = ($sLabel = $Profile) ? BitOR($WS_BORDER, $WS_TABSTOP) : $WS_TABSTOP
+		Local $hBtn = GUICtrlCreateButton($sLabel, $iX, $iY, $iBtnW, $iBtnH, $iStyle)
+		If GUICtrlSetOnEvent($hBtn, "_ButtonClick") = 0 Then
+			Exit MsgBox(0, "Error", "Can't register click event for: " & $sLabel & @CRLF & "[CtrlID]: " & $hBtn)
+		EndIf
+		$iY += $iBtnH + $iSpacing
+		If Mod($i, $iMaxPerCol) = 0 Then
+			$iY = $iSpacing
+			$iX += $iBtnW + $iSpacing
+		EndIf
+	Next
+	GUISetState(@SW_SHOW)
+EndFunc   ;==>GuiInit
+Func _CloseGUI()
+	Exit
+EndFunc   ;==>_CloseGUI
+Func _ButtonClick()
+	GUISetState(@SW_HIDE)
+	$Profile = GUICtrlRead(@GUI_CtrlId)
+	$Profile_Set = True
+EndFunc   ;==>_ButtonClick
 Func CreateProfileFolderIfEmpty()
 	DirCreate($ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name)
 EndFunc   ;==>CreateProfileFolderIfEmpty
