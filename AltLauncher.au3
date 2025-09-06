@@ -78,6 +78,8 @@ Func ReadConfig()
 		Switch $CmdLine[1]
 			Case "--"
 
+			Case "--select"
+				$Profile = ""
 			Case "--read"
 				$Profile = FileRead($ProfilesPath & "\Selected Profile.txt")
 			Case Else
