@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.1
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.2
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
@@ -339,6 +339,17 @@ Func Setup()
 			RegWrite("HKCU\Environment", "AltLauncher_UseRecyclingBin", "REG_SZ", "False")
 		Case $IDCANCEL
 			RegDelete("HKCU\Environment", "AltLauncher_UseRecyclingBin")
+	EndSwitch
+	Switch MsgBox(4, $Title, "Would you like to be asked which profile you would like to load each time you start a game?" & @CRLF & @CRLF & "Click 'Yes' to use the Recycling Bin." & @CRLF & "Click 'No' to permanently delete erased slots." & @CRLF & "Click 'Cancel' will preserve any erased save slots, restoring them on the next launch.")
+		Case $IDYES
+			RegWrite("HKCU\Environment", "AltLauncher_UseProfileFile", "REG_SZ", "False")
+		Case $IDNO
+			RegWrite("HKCU\Environment", "AltLauncher_UseProfileFile", "REG_SZ", "True")
+			If FileCopy(@ScriptDir & "\AltSetter.exe", RegRead("HKCU\Environment", "AltLauncher_Path"), 9) Then
+				MsgBox(16, $Title, 'AltSetter has been automatically copied into "' & RegRead("HKCU\Environment", "AltLauncher_Path") & '"')
+			Else
+				MsgBox(48, $Title, 'You will need to copy AltSetter into "' & RegRead("HKCU\Environment", "AltLauncher_Path") & '"')
+			EndIf
 	EndSwitch
 	$AutoDetectSteam3 = _FileListToArray("C:\Program Files (x86)\Steam\userdata", "*", $FLTA_FOLDERS)
 	If $AutoDetectSteam3[0] = 1 Then
