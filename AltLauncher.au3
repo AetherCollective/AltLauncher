@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.3
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.4
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
@@ -138,11 +138,18 @@ Func _ButtonClick()
 	If $Profile = "+" Then
 		Do
 			$ChosenName = InputBox($Title, "Please enter a new profile name.")
-			if @error then
-				$Profile_Set=False
+			If @error Then
+				$Profile_Set = False
 				GUISetState(@SW_SHOW)
+			Else
+				Select
+					Case $ChosenName = ""
+						MsgBox(48, $Title, 'Profile name cannot be blank. Please choose another name.')
+					Case FileExists($ProfilesPath & '\' & $ChosenName) = True
+						MsgBox(48, $Title, 'Profile "' & $ChosenName & '" already exists. Please choose another name.')
+				EndSelect
 			EndIf
-		Until FileExists($ProfilesPath & '\' & $ChosenName) = False OR $Profile_Set = False
+		Until FileExists($ProfilesPath & '\' & $ChosenName) = False Or $Profile_Set = False
 		DirCreate($ProfilesPath & '\' & $ChosenName)
 		$Profile = $ChosenName
 	EndIf
