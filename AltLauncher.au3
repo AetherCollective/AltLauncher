@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.2
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.3
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
@@ -109,8 +109,12 @@ Func GuiInit()
 	Local $hGUI = GUICreate("AltLauncher", $iWinW, $iWinH, -1, -1, $WS_SYSMENU)
 	GUISetOnEvent($GUI_EVENT_CLOSE, "_CloseGUI")
 	Local $iX = $iSpacing, $iY = $iSpacing
-	For $i = 1 To $iTotal
-		Local $sLabel = $aFolders[$i]
+	For $i = 1 To $iTotal + 1
+		If $i <= $iTotal Then
+			Local $sLabel = $aFolders[$i]
+		Else
+			Local $sLabel = "+"
+		EndIf
 		Local $iStyle = ($sLabel = $Profile) ? BitOR($WS_BORDER, $WS_TABSTOP) : $WS_TABSTOP
 		Local $hBtn = GUICtrlCreateButton($sLabel, $iX, $iY, $iBtnW, $iBtnH, $iStyle)
 		If GUICtrlSetOnEvent($hBtn, "_ButtonClick") = 0 Then
@@ -131,6 +135,17 @@ Func _ButtonClick()
 	GUISetState(@SW_HIDE)
 	$Profile = GUICtrlRead(@GUI_CtrlId)
 	$Profile_Set = True
+	If $Profile = "+" Then
+		Do
+			$ChosenName = InputBox($Title, "Please enter a new profile name.")
+			if @error then
+				$Profile_Set=False
+				GUISetState(@SW_SHOW)
+			EndIf
+		Until FileExists($ProfilesPath & '\' & $ChosenName) = False OR $Profile_Set = False
+		DirCreate($ProfilesPath & '\' & $ChosenName)
+		$Profile = $ChosenName
+	EndIf
 EndFunc   ;==>_ButtonClick
 Func CreateProfileFolderIfEmpty()
 	DirCreate($ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name)
