@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.4
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.5
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
@@ -54,6 +54,10 @@ Func ReadEnvironmentVariables()
 	EnvSet("UbisoftID", RegRead("HKCU\Environment", "UbisoftID"))
 	EnvSet("RockstarID", RegRead("HKCU\Environment", "RockstarID"))
 	EnvSet("AltLauncher_UseProfileFile", RegRead("HKCU\Environment", "AltLauncher_UseProfileFile"))
+	EnvSet("AltLauncher_ButtonWidth", RegRead("HKCU\Environment", "AltLauncher_ButtonWidth"))
+	EnvSet("AltLauncher_ButtonHeight", RegRead("HKCU\Environment", "AltLauncher_ButtonHeight"))
+	EnvSet("AltLauncher_NumOfRows", RegRead("HKCU\Environment", "AltLauncher_NumOfRows"))
+	EnvSet("AltLauncher_ButtonSpacing", RegRead("HKCU\Environment", "AltLauncher_ButtonSpacing"))
 EndFunc   ;==>ReadEnvironmentVariables
 Func ReadConfig()
 	Global $Ini = @ScriptDir & "\" & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".ini"
@@ -100,12 +104,15 @@ Func GuiInit()
 	If @error Then
 		Exit MsgBox(16, "Error", "No folders found in script directory.")
 	EndIf
-	Local Const $iSpacing = 4, $iMaxPerCol = 6, $iBtnW = 120, $iBtnH = 60
+	Local Const $iSpacing = (EnvGet("AltLauncher_ButtonSpacing") <> "" ? Int(EnvGet("AltLauncher_ButtonSpacing")) : 4)
+	Local $iMaxPerCol = (EnvGet("AltLauncher_NumOfRows") <> "" ? Int(EnvGet("AltLauncher_NumOfRows")) : 5)
+	Local $iBtnW = (EnvGet("AltLauncher_ButtonWidth") <> "" ? Int(EnvGet("AltLauncher_ButtonWidth")) : 120)
+	Local $iBtnH = (EnvGet("AltLauncher_ButtonHeight") <> "" ? Int(EnvGet("AltLauncher_ButtonHeight")) : 55)
 	Local $iTotal = $aFolders[0]
 	Local $iCols = Ceiling($iTotal / $iMaxPerCol)
 	Local $iRows = _Min($iTotal, $iMaxPerCol)
-	Local $iWinW = $iCols * ($iBtnW + $iSpacing) + $iSpacing * 2 + 2
-	Local $iWinH = ($iRows + 1) * ($iBtnH + $iSpacing) - ($iBtnH / 2)
+	Local $iWinW = ($iSpacing + $iBtnW + 1) * $iCols + $iSpacing + 2
+	Local $iWinH = ($iSpacing + $iBtnH) * $iRows + $iSpacing + 30
 	Local $hGUI = GUICreate("AltLauncher", $iWinW, $iWinH, -1, -1, $WS_SYSMENU)
 	GUISetOnEvent($GUI_EVENT_CLOSE, "_CloseGUI")
 	Local $iX = $iSpacing, $iY = $iSpacing
