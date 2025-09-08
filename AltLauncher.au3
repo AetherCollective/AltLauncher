@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.5
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.6
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
@@ -109,8 +109,8 @@ Func GuiInit()
 	Local $iBtnW = (EnvGet("AltLauncher_ButtonWidth") <> "" ? Int(EnvGet("AltLauncher_ButtonWidth")) : 120)
 	Local $iBtnH = (EnvGet("AltLauncher_ButtonHeight") <> "" ? Int(EnvGet("AltLauncher_ButtonHeight")) : 55)
 	Local $iTotal = $aFolders[0]
-	Local $iCols = Ceiling($iTotal / $iMaxPerCol)
-	Local $iRows = _Min($iTotal, $iMaxPerCol)
+	Local $iCols = Ceiling(($iTotal + 1) / $iMaxPerCol)
+	Local $iRows = _Min(($iTotal + 1), $iMaxPerCol)
 	Local $iWinW = ($iSpacing + $iBtnW + 1) * $iCols + $iSpacing + 2
 	Local $iWinH = ($iSpacing + $iBtnH) * $iRows + $iSpacing + 30
 	Local $hGUI = GUICreate("AltLauncher", $iWinW, $iWinH, -1, -1, $WS_SYSMENU)
