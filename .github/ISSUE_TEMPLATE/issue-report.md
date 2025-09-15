@@ -7,7 +7,7 @@ assignees: AetherCollective
 
 ---
 
-**Describe the bug**
+**Describe the issue**
 Please describe what the issue is.
 
 **To Reproduce**
