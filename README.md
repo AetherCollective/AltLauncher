@@ -14,7 +14,6 @@ YouTube Video: https://www.youtube.com/watch?v=l9H_WKFcTcQ
    1. [Moving AltLauncher to the Game Directory](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#1-moving-altlauncher-to-the-game-directory)
    2. [Configuring AltLauncher.ini](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#2-configuring-altlauncherini)
    3. [Set up your Environment Paths](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#3-set-up-your-environment-paths)
-   4. [Utility Program - AltSetter](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#4-utility-program---altsetter)
 2. [The AltLauncher File](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#the-altlauncherini-file)
 3. [Usage Workflow](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#usage-workflow)
 4. [Command Line Usage](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#command-line-usage)
@@ -46,14 +45,10 @@ Before you do all the hard work yourself, see if there's an AltLauncher.ini for 
 
 #### 3. Set up your Environment Paths
 
-  - It is recommended to set the `%AltLauncher_Path%` to point to where you want your save files to be stored. 
+  - It is recommended to set the environment flag `AltLauncher_Path` to point to where you want your save files to be stored. 
     - By default, this is `C:\Alters`, but you could set it to any cloud-synced folder if you wish.
-  - You may also want to set the `%AltLauncher_SubPath%` if you desire a certain sub-folder structure. 
-    - For example: a subpath value of `Files\GameSaves` with the default path would resolve to `C:\Alters\<ProfileName>\Files\GameSaves`. By default, this is blank.
-
-#### 4. Utility Program - AltSetter
-
-AltSetter is a utility program to select a profile that can be used instead of the command line option. You should place it inside the directory you set for `%AltLauncher_Path%`. Using this program sets the `%AltLauncher_Path%\Selected_Profile.txt` file.
+  - You may also want to set the environment flag `AltLauncher_SubPath` if you desire a certain sub-folder structure. 
+    - For example: a subpath value of `Files\GameSaves` with the default AltLauncher_Path path would resolve to `C:\Alters\<ProfileName>\Files\GameSaves`. By default, this value is blank.
 
 ## The AltLauncher.ini File
 
@@ -160,6 +155,22 @@ AltLauncher.exe "ProfileName"
 -   Replace `"ProfileName"` with the desired profile folder name.
 -   When running from a script or batch file, ensure the profile name matches one present in the `Profiles` directory.
 -   If you do not define a profile, it will check the `%AltLauncher_Path%\Selected_Profile.txt` file and use it's value. If this file is missing or is invalid, you will receive an error.
+
+
+```
+AltLauncher.exe --select
+
+```
+
+-  Forces the select user dialog to show up.
+
+
+```
+AltLauncher.exe --load
+
+```
+
+-  Supresses the select user dialog and loads the profile specified at `%AltLauncher_Path%\Selected Profile.txt`
 
 ## Auto-Updater
 AltLauncher comes with an auto updater program that can act as a drop-in replacement for AltLauncher. It will automatically update AltLauncher to the latest version before execution. If you wish to use as a drop-in replacement, just update your shortcut/launcher to launch `AltLauncher.Updater.exe` instead of `AltLauncher.exe`
