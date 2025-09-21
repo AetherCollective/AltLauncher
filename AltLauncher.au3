@@ -2,8 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.6
-#AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.7
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
@@ -58,6 +57,7 @@ Func ReadEnvironmentVariables()
 	EnvSet("AltLauncher_ButtonHeight", RegRead("HKCU\Environment", "AltLauncher_ButtonHeight"))
 	EnvSet("AltLauncher_NumOfRows", RegRead("HKCU\Environment", "AltLauncher_NumOfRows"))
 	EnvSet("AltLauncher_ButtonSpacing", RegRead("HKCU\Environment", "AltLauncher_ButtonSpacing"))
+	EnvSet("AltLauncher_ButtonDirection", RegRead("HKCU\Environment", "AltLauncher_ButtonDirection"))
 EndFunc   ;==>ReadEnvironmentVariables
 Func ReadConfig()
 	Global $Ini = @ScriptDir & "\" & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".ini"
@@ -109,8 +109,17 @@ Func GuiInit()
 	Local $iBtnW = (EnvGet("AltLauncher_ButtonWidth") <> "" ? Int(EnvGet("AltLauncher_ButtonWidth")) : 120)
 	Local $iBtnH = (EnvGet("AltLauncher_ButtonHeight") <> "" ? Int(EnvGet("AltLauncher_ButtonHeight")) : 55)
 	Local $iTotal = $aFolders[0]
-	Local $iCols = Ceiling(($iTotal + 1) / $iMaxPerCol)
-	Local $iRows = _Min(($iTotal + 1), $iMaxPerCol)
+	Local $sLayout = (EnvGet("AltLauncher_ButtonDirection") <> "" ? EnvGet("AltLauncher_ButtonDirection") : "down")
+
+	Local $iCols, $iRows
+	If $sLayout = "right" Then
+		$iRows = Ceiling(($iTotal + 1) / $iMaxPerCol)
+		$iCols = _Min(($iTotal + 1), $iMaxPerCol)
+	Else ;down
+		$iCols = Ceiling(($iTotal + 1) / $iMaxPerCol)
+		$iRows = _Min(($iTotal + 1), $iMaxPerCol)
+	EndIf
+
 	Local $iWinW = ($iSpacing + $iBtnW + 1) * $iCols + $iSpacing + 2
 	Local $iWinH = ($iSpacing + $iBtnH) * $iRows + $iSpacing + 30
 	Local $hGUI = GUICreate("AltLauncher", $iWinW, $iWinH, -1, -1, $WS_SYSMENU)
@@ -127,10 +136,19 @@ Func GuiInit()
 		If GUICtrlSetOnEvent($hBtn, "_ButtonClick") = 0 Then
 			Exit MsgBox(0, "Error", "Can't register click event for: " & $sLabel & @CRLF & "[CtrlID]: " & $hBtn)
 		EndIf
-		$iY += $iBtnH + $iSpacing
-		If Mod($i, $iMaxPerCol) = 0 Then
-			$iY = $iSpacing
+
+		If $sLayout = "down" Then
+			$iY += $iBtnH + $iSpacing
+			If Mod($i, $iMaxPerCol) = 0 Then
+				$iY = $iSpacing
+				$iX += $iBtnW + $iSpacing
+			EndIf
+		Else
 			$iX += $iBtnW + $iSpacing
+			If Mod($i, $iMaxPerCol) = 0 Then
+				$iX = $iSpacing
+				$iY += $iBtnH + $iSpacing
+			EndIf
 		EndIf
 	Next
 	GUISetState(@SW_SHOW)
