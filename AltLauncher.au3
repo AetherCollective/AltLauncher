@@ -55,7 +55,7 @@ Func ReadEnvironmentVariables()
 	EnvSet("AltLauncher_UseProfileFile", RegRead("HKCU\Environment", "AltLauncher_UseProfileFile"))
 	EnvSet("AltLauncher_ButtonWidth", RegRead("HKCU\Environment", "AltLauncher_ButtonWidth"))
 	EnvSet("AltLauncher_ButtonHeight", RegRead("HKCU\Environment", "AltLauncher_ButtonHeight"))
-	EnvSet("AltLauncher_NumOfRows", RegRead("HKCU\Environment", "AltLauncher_NumOfRows"))
+	EnvSet("AltLauncher_NumberOfButtonsPerDirection", RegRead("HKCU\Environment", "AltLauncher_NumberOfButtonsPerDirection"))
 	EnvSet("AltLauncher_ButtonSpacing", RegRead("HKCU\Environment", "AltLauncher_ButtonSpacing"))
 	EnvSet("AltLauncher_ButtonDirection", RegRead("HKCU\Environment", "AltLauncher_ButtonDirection"))
 EndFunc   ;==>ReadEnvironmentVariables
@@ -105,7 +105,7 @@ Func GuiInit()
 		Exit MsgBox(16, "Error", "No folders found in script directory.")
 	EndIf
 	Local Const $iSpacing = (EnvGet("AltLauncher_ButtonSpacing") <> "" ? Int(EnvGet("AltLauncher_ButtonSpacing")) : 4)
-	Local $iMaxPerCol = (EnvGet("AltLauncher_NumOfRows") <> "" ? Int(EnvGet("AltLauncher_NumOfRows")) : 5)
+	Local $iMaxPer = (EnvGet("AltLauncher_NumberOfButtonsPerDirection") <> "" ? Int(EnvGet("AltLauncher_NumberOfButtonsPerDirection")) : 5)
 	Local $iBtnW = (EnvGet("AltLauncher_ButtonWidth") <> "" ? Int(EnvGet("AltLauncher_ButtonWidth")) : 120)
 	Local $iBtnH = (EnvGet("AltLauncher_ButtonHeight") <> "" ? Int(EnvGet("AltLauncher_ButtonHeight")) : 55)
 	Local $iTotal = $aFolders[0]
@@ -113,11 +113,11 @@ Func GuiInit()
 
 	Local $iCols, $iRows
 	If $sLayout = "right" Then
-		$iRows = Ceiling(($iTotal + 1) / $iMaxPerCol)
-		$iCols = _Min(($iTotal + 1), $iMaxPerCol)
+		$iRows = Ceiling(($iTotal + 1) / $iMaxPer)
+		$iCols = _Min(($iTotal + 1), $iMaxPer)
 	Else ;down
-		$iCols = Ceiling(($iTotal + 1) / $iMaxPerCol)
-		$iRows = _Min(($iTotal + 1), $iMaxPerCol)
+		$iCols = Ceiling(($iTotal + 1) / $iMaxPer)
+		$iRows = _Min(($iTotal + 1), $iMaxPer)
 	EndIf
 
 	Local $iWinW = ($iSpacing + $iBtnW + 1) * $iCols + $iSpacing + 2
@@ -139,13 +139,13 @@ Func GuiInit()
 
 		If $sLayout = "down" Then
 			$iY += $iBtnH + $iSpacing
-			If Mod($i, $iMaxPerCol) = 0 Then
+			If Mod($i, $iMaxPer) = 0 Then
 				$iY = $iSpacing
 				$iX += $iBtnW + $iSpacing
 			EndIf
 		Else
 			$iX += $iBtnW + $iSpacing
-			If Mod($i, $iMaxPerCol) = 0 Then
+			If Mod($i, $iMaxPer) = 0 Then
 				$iX = $iSpacing
 				$iY += $iBtnH + $iSpacing
 			EndIf
