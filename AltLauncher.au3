@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.7
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.8
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
@@ -83,7 +83,16 @@ Func ReadConfig()
 			Case "--"
 
 			Case "--read"
-				$Profile = FileRead($ProfilesPath & "\Selected Profile.txt")
+				Local $filestate = False
+				$hFile = FileOpen($ProfilesPath & "\Selected Profile.txt", 2)
+				If $hFile = -1 Then ;hidden file check
+					$attrib = FileGetAttrib(@ScriptDir & "\Selected Profile.txt")
+					FileSetAttrib(@ScriptDir & "\Selected Profile.txt", "-H")
+					$hFile = FileOpen(@ScriptDir & "\Selected Profile.txt", 2)
+				EndIf
+				FileRead($ProfilesPath & "\Selected Profile.txt")
+				FileClose($hFile)
+				If $filestate = True Then FileSetAttrib(@ScriptDir & "\Selected Profile.txt", "+" & $attrib)
 			Case "--select"
 				$Profile = ""
 			Case Else
@@ -122,7 +131,7 @@ Func GuiInit()
 
 	Local $iWinW = ($iSpacing + $iBtnW + 1) * $iCols + $iSpacing + 2
 	Local $iWinH = ($iSpacing + $iBtnH) * $iRows + $iSpacing + 30
-	Local $hGUI = GUICreate("AltLauncher", $iWinW, $iWinH, -1, -1, $WS_SYSMENU)
+	Local $hGUI = GUICreate($Title & " - Game: " & $Name, $iWinW, $iWinH, -1, -1, $WS_SYSMENU)
 	GUISetOnEvent($GUI_EVENT_CLOSE, "_CloseGUI")
 	Local $iX = $iSpacing, $iY = $iSpacing
 	For $i = 1 To $iTotal + 1
@@ -183,11 +192,14 @@ Func CreateProfileFolderIfEmpty()
 	DirCreate($ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name)
 EndFunc   ;==>CreateProfileFolderIfEmpty
 Func CheckIfAlreadyRunning()
-	Do
-		$ProcessList = ProcessList("AltLauncher.exe")
-		Sleep(250)
-	Until $ProcessList[0][0] < 2
-EndFunc   ;==>CheckIfAlreadyRunning
+	If _Singleton("AltLauncher_" & $Name, 1) = 0 Then ;already running
+		If MsgBox($MB_ICONERROR + $MB_RETRYCANCEL, $Title & " - Game: " & $Name, "AltLauncher is already active for this game. Only one instance allowed per game.") = 4 Then
+			CheckIfAlreadyRunning()
+		Else
+			Exit
+		EndIf
+	EndIf
+EndFunc   ;==>CheckIfAlreadyRunningV2
 Func CheckStateFile()
 	Return FileExists(@ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & ".state")
 EndFunc   ;==>CheckStateFile
@@ -201,8 +213,8 @@ Func WriteStateFile()
 	FileWrite(@ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & ".state", $Profile)
 EndFunc   ;==>WriteStateFile
 Func ShowProgressBar()
-	$Title &= " - Profile: "
-	ProgressOn($Title & $Profile, "Loading...", "", -1, -1, $DLG_NOTONTOP + $DLG_MOVEABLE)
+	$Title &= " - Profile: " & $Profile & " - Game: " & $Name
+	ProgressOn($Title, "Loading...", "", -1, -1, $DLG_NOTONTOP + $DLG_MOVEABLE)
 EndFunc   ;==>ShowProgressBar
 Func RunLauncherIfNeeded()
 	If FileExists(@ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & "-launcher.cmd") Then
