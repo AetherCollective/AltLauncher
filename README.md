@@ -1,5 +1,7 @@
 # AltLauncher Documentation
 
+[Templates](https://github.com/aethercollective/altlauncher-templates)
+
 ## Introduction
 **AltLauncher** is a utility designed to streamline the profile management of games by handling registry modifications, directory adjustments, and file operations. This documentation will guide users through setting up and configuring AltLauncher for use with their preferred games.
 
