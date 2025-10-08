@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.8
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.9
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
@@ -110,14 +110,14 @@ Func GuiInit()
 		Return
 	EndIf
 	Local $aFolders = _FileListToArray($ProfilesPath, "*", $FLTA_FOLDERS)
-	If @error Then
-		Exit MsgBox(16, "Error", "No folders found in script directory.")
-	EndIf
 	Local Const $iSpacing = (EnvGet("AltLauncher_ButtonSpacing") <> "" ? Int(EnvGet("AltLauncher_ButtonSpacing")) : 4)
 	Local $iMaxPer = (EnvGet("AltLauncher_NumberOfButtonsPerDirection") <> "" ? Int(EnvGet("AltLauncher_NumberOfButtonsPerDirection")) : 5)
 	Local $iBtnW = (EnvGet("AltLauncher_ButtonWidth") <> "" ? Int(EnvGet("AltLauncher_ButtonWidth")) : 120)
 	Local $iBtnH = (EnvGet("AltLauncher_ButtonHeight") <> "" ? Int(EnvGet("AltLauncher_ButtonHeight")) : 55)
-	Local $iTotal = $aFolders[0]
+	Global $iTotal = 0
+	If IsArray($aFolders) And UBound($aFolders) > 0 Then
+		$iTotal = $aFolders[0]
+	EndIf
 	Local $sLayout = (EnvGet("AltLauncher_ButtonDirection") <> "" ? EnvGet("AltLauncher_ButtonDirection") : "down")
 
 	Local $iCols, $iRows
@@ -160,6 +160,7 @@ Func GuiInit()
 			EndIf
 		EndIf
 	Next
+	If $iTotal = 0 Then _ButtonClick()
 	GUISetState(@SW_SHOW)
 EndFunc   ;==>GuiInit
 Func _CloseGUI()
@@ -167,7 +168,7 @@ Func _CloseGUI()
 EndFunc   ;==>_CloseGUI
 Func _ButtonClick()
 	GUISetState(@SW_HIDE)
-	$Profile = GUICtrlRead(@GUI_CtrlId)
+	$Profile = ($iTotal = 0) ? "+" : GUICtrlRead(@GUI_CtrlId)
 	$Profile_Set = True
 	If $Profile = "+" Then
 		Do
@@ -199,7 +200,7 @@ Func CheckIfAlreadyRunning()
 			Exit
 		EndIf
 	EndIf
-EndFunc   ;==>CheckIfAlreadyRunningV2
+EndFunc   ;==>CheckIfAlreadyRunning
 Func CheckStateFile()
 	Return FileExists(@ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & ".state")
 EndFunc   ;==>CheckStateFile
