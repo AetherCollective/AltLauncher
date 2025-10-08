@@ -1,5 +1,7 @@
 # AltLauncher Documentation
 
+[Templates](https://github.com/aethercollective/altlauncher-templates)
+
 ## Introduction
 **AltLauncher** is a utility designed to streamline the profile management of games by handling registry modifications, directory adjustments, and file operations. This documentation will guide users through setting up and configuring AltLauncher for use with their preferred games.
 
@@ -41,7 +43,7 @@ To correctly populate `AltLauncher.ini`, consult **PCGamingWiki**:
 3.  Use the provided information to define your `AltLauncher.ini` settings.
     - See [The AltLauncher.ini File](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#the-altlauncherini-file) for more info.
 
-Before you do all the hard work yourself, see if there's an AltLauncher.ini for your game in the [Templates](https://github.com/AetherCollective/AltLauncher/tree/main/Templates/) area. 
+Before you do all the hard work yourself, see if there's an AltLauncher.ini for your game in the [Templates](https://github.com/aethercollective/altlauncher-templates) area. 
 
 #### 3. Set up your Environment Paths
 
