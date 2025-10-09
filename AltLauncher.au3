@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.9
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.10
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
@@ -400,7 +400,7 @@ Func Setup()
 		Case $IDCANCEL
 			RegDelete("HKCU\Environment", "AltLauncher_UseRecyclingBin")
 	EndSwitch
-	Switch MsgBox(4, $Title, "Would you like to be asked which profile you would like to load each time you start a game?" & @CRLF & @CRLF & "Click 'Yes' to use the Recycling Bin." & @CRLF & "Click 'No' to permanently delete erased slots." & @CRLF & "Click 'Cancel' will preserve any erased save slots, restoring them on the next launch.")
+	Switch MsgBox(4, $Title, "Would you like to be asked which profile you would like to load each time you start a game?")
 		Case $IDYES
 			RegWrite("HKCU\Environment", "AltLauncher_UseProfileFile", "REG_SZ", "False")
 		Case $IDNO
@@ -424,7 +424,7 @@ Func Setup()
 		RegWrite("HKCU\Environment", "SteamID64", "REG_SZ", InputBox($Title, "Enter your Steam64 ID." & @CRLF & @CRLF & "You can get your Steam64 at https://steamid.io/" & @CRLF))
 	EndIf
 	$AutoDetectUbisoftID = _FileListToArray("C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames", "*", $FLTA_FOLDERS)
-	If $AutoDetectUbisoftID[0] = 1 Then
+	If IsArray($AutoDetectUbisoftID) And $AutoDetectUbisoftID[0] = 1 Then
 		RegWrite("HKCU\Environment", "UbisoftID", "REG_SZ", $AutoDetectUbisoftID[1])
 	Else
 		RegWrite("HKCU\Environment", "UbisoftID", "REG_SZ", InputBox($Title, "Enter your Ubisoft ID." & @CRLF & @CRLF & "Consult the readme.md on how to obtain this." & @CRLF))
