@@ -174,6 +174,13 @@ AltLauncher.exe --load
 
 -  Supresses the select user dialog and loads the profile specified at `%AltLauncher_Path%\Selected Profile.txt`
 
+```
+AltLauncher.exe --setup
+
+```
+
+-  Re-runs the first time setup.
+
 ## Auto-Updater
 AltLauncher comes with an auto updater program that can act as a drop-in replacement for AltLauncher. It will automatically update AltLauncher to the latest version before execution. If you wish to use as a drop-in replacement, just update your shortcut/launcher to launch `AltLauncher.Updater.exe` instead of `AltLauncher.exe`
 
