@@ -2,14 +2,15 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.11
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.12
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
 #include <File.au3>
-#include <Misc.au3>
-#include <Math.au3>
 #include <GUIConstantsEx.au3>
+#include <InetConstants.au3>
+#include <Math.au3>
+#include <Misc.au3>
 #include <WindowsConstants.au3>
 Opt("GUIOnEventMode", True)
 Opt("TrayIconHide", True)
@@ -63,7 +64,20 @@ Func ReadConfig()
 	Global $Ini = @ScriptDir & "\" & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".ini"
 	If Not FileExists($Ini) Then
 		$SearchResults = _FileListToArrayRec(@ScriptDir, StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".ini", $FLTAR_FILES, $FLTAR_RECUR)
-		If Not IsArray($SearchResults) Then ExitMSG(StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".ini not found.")
+		If Not IsArray($SearchResults) Then
+			Switch MsgBox(4, $Title, "AltLauncher.ini not found. Would you like to download a template from the internet?")
+				Case $IDYES
+					$gamename = DetectGame()
+					If IsInt($gameName) Then ExitMSG("Your game is not in our database. Exiting...")
+					If IsString($gameName) Then
+						$downloaded = DownloadGameConfig($gameName)
+						If Int($downloaded) <> 1 Then ExitMSG(StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".ini could not be downloaded at this time. Please try again later.")
+					EndIf
+					$SearchResults = _FileListToArrayRec(@ScriptDir, StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".ini", $FLTAR_FILES, $FLTAR_RECUR)
+				Case $IDNO
+					ExitMSG(StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".ini not found.")
+			EndSwitch
+		EndIf
 		If $SearchResults[0] <> 1 Then ExitMSG("Multiple " & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".ini found. Please remove all but one and try again.")
 		$Ini = @ScriptDir & "\" & $SearchResults[1]
 	EndIf
@@ -107,6 +121,57 @@ Func ReadConfig()
 	Global $Directories = ReadINISection($Ini, "Directories")
 	Global $Files = ReadINISection($Ini, "Files")
 EndFunc   ;==>ReadConfig
+Func DetectGame()
+	$success = False
+	$url = "https://raw.githubusercontent.com/AetherCollective/AltLauncher-Templates/refs/heads/main/gamelist.ini"
+	$savePath = @TempDir & "\AltLauncher\gamelist.ini"
+	DirCreate(@TempDir & "\AltLauncher")
+	For $i = 1 To 3 ;Retry up to 3 times
+		$download = InetGet($url, $savePath, $INET_FORCERELOAD, $INET_DOWNLOADBACKGROUND)   ; flag 1 = overwrite, flag 1 = wait
+		Do
+			Sleep(100)
+		Until InetGetInfo($download, $INET_DOWNLOADCOMPLETE)
+		If FileExists($savePath) And FileGetSize($savePath) > 0 Then
+			$success = True
+			ExitLoop
+		EndIf
+		Sleep(1000)
+	Next
+	If Not $success Then Return 0 ; download failed
+	$steamID = EnvGet("steamappid")
+	If $steamID = "" Then Return 1 ; steam id not detected
+	$games = IniReadSection($savePath, "Steam")
+	If @error Then Return 2 ; database corrupted
+	$gameName = ""
+	For $i = 1 To $games[0][0]
+		If $games[$i][1] = $steamID Then
+			$gameName = $games[$i][0]
+			ExitLoop
+		EndIf
+	Next
+	If $gameName = "" Then Return -1 ; game not found
+	$gameName = StringRegExpReplace($gameName, '^"(.*)"$', '\1')
+	Return $gameName
+EndFunc   ;==>DetectGame
+Func DownloadGameConfig($gameName)
+	$success = False
+	If $gameName = "" Then Return 2 ; game not found
+	$url = "https://raw.githubusercontent.com/AetherCollective/AltLauncher-Templates/refs/heads/main/" & $gameName & "/AltLauncher.ini"
+	$savePath = @ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & ".ini"
+	For $i = 1 To 3 ;Retry up to 3 times
+		$download = InetGet($url, $savePath, $INET_FORCERELOAD, $INET_DOWNLOADBACKGROUND)   ; flag 1 = overwrite, flag 1 = wait
+		Do
+			Sleep(100)
+		Until InetGetInfo($download, $INET_DOWNLOADCOMPLETE)
+		If FileExists($savePath) And FileGetSize($savePath) > 0 Then
+			$success = True
+			ExitLoop
+		EndIf
+		Sleep(1000)
+	Next
+	If $success Then Return 1 ; download successful
+	Return 0 ; download failed=
+EndFunc   ;==>DownloadGameConfig
 Func GuiInit()
 	If $Profile <> "" Then
 		$Profile_Set = True
