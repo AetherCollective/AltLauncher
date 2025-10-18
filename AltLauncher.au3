@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.10
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.11
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
@@ -83,16 +83,17 @@ Func ReadConfig()
 			Case "--"
 
 			Case "--read"
-				Local $filestate = False
+				$filestate = False
 				$hFile = FileOpen($ProfilesPath & "\Selected Profile.txt", 2)
 				If $hFile = -1 Then ;hidden file check
-					$attrib = FileGetAttrib(@ScriptDir & "\Selected Profile.txt")
-					FileSetAttrib(@ScriptDir & "\Selected Profile.txt", "-H")
-					$hFile = FileOpen(@ScriptDir & "\Selected Profile.txt", 2)
+					$attrib = FileGetAttrib($ProfilesPath & "\Selected Profile.txt")
+					FileSetAttrib($ProfilesPath & "\Selected Profile.txt", "-H")
+					$filestate = True
+					$hFile = FileOpen($ProfilesPath & "\Selected Profile.txt", 2)
 				EndIf
 				FileRead($ProfilesPath & "\Selected Profile.txt")
 				FileClose($hFile)
-				If $filestate = True Then FileSetAttrib(@ScriptDir & "\Selected Profile.txt", "+" & $attrib)
+				If $filestate = True Then FileSetAttrib($ProfilesPath & "\Selected Profile.txt", "+" & $attrib)
 			Case "--select"
 				$Profile = ""
 			Case Else
