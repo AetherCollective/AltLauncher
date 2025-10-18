@@ -96,6 +96,8 @@ Func ReadConfig()
 				If $filestate = True Then FileSetAttrib($ProfilesPath & "\Selected Profile.txt", "+" & $attrib)
 			Case "--select"
 				$Profile = ""
+			Case "--setup"
+				Setup()
 			Case Else
 				; Any other value is treated as a direct profile name
 				$Profile = $CmdLine[1]
