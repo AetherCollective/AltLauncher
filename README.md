@@ -45,6 +45,8 @@ To correctly populate `AltLauncher.ini`, consult **PCGamingWiki**:
 
 Before you do all the hard work yourself, see if there's an AltLauncher.ini for your game in the [Templates](https://github.com/aethercollective/altlauncher-templates) area. 
 
+AltLauncher will ask you if you want to download a template if you did not complete this step. If your game is not found, let us know [HERE](https://github.com/AetherCollective/AltLauncher-Templates/issues/new?template=game-request.md)
+
 #### 3. Set up your Environment Paths
 
   - It is recommended to set the environment flag `AltLauncher_Path` to point to where you want your save files to be stored. 
