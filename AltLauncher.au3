@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.2.1.0
+#AutoIt3Wrapper_Res_Fileversion=0.2.1.1
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
@@ -16,32 +16,29 @@ Opt("GUIOnEventMode", True)
 Opt("TrayIconHide", True)
 Opt("ExpandEnvStrings", True)
 Global $Title = "AltLauncher", $Profile_Set = False
-
-RegisterVariables()
 ReadEnvironmentVariables()
 If RegRead("HKCU\Environment", "AltLauncher_Path") = "" Then Setup()
 ReadConfig()
-GuiInit()
+CheckIfAlreadyRunning()
+If CheckStateFile() = True Then RepairState()
+ProfileSelect()
 Do
 	Sleep(100)
 Until $Profile_Set = True
-CheckIfAlreadyRunning()
-If CheckStateFile() = True Then RepairState()
-WriteStateFile()
 CreateProfileFolderIfEmpty()
+WriteStateFile()
 ShowProgressBar()
 Backup()
 EnableChecks()
-RunLauncherIfNeeded()
+RunLauncher()
 RunGame()
 WaitWhileGameRunning()
-doExit()
-
-Func RegisterVariables()
-	Global $backup = "backup", $restore = "restore"
-EndFunc   ;==>RegisterVariables
+WhenGameCloses()
+Restore()
+sleep(2000)
+Exit
 Func ReadINISection(ByRef $Ini, $Section)
-	Local $Data = IniReadSection($Ini, $Section)
+	$Data = IniReadSection($Ini, $Section)
 	If @error Then
 		Local $Data[1][2]
 		$Data[0][0] = 0
@@ -67,7 +64,7 @@ Func ReadConfig()
 		If Not IsArray($SearchResults) Then
 			Switch MsgBox(4, $Title, "AltLauncher.ini not found. Would you like to download a template from the internet?")
 				Case $IDYES
-					$gamename = DetectGame()
+					$gameName = DetectGame()
 					If IsInt($gameName) Then ExitMSG("Your game is not in our database. Exiting...")
 					If IsString($gameName) Then
 						$downloaded = DownloadGameConfig($gameName)
@@ -172,71 +169,65 @@ Func DownloadGameConfig($gameName)
 	If $success Then Return 1 ; download successful
 	Return 0 ; download failed=
 EndFunc   ;==>DownloadGameConfig
-Func GuiInit()
+Func ProfileSelect()
 	If $Profile <> "" Then
 		$Profile_Set = True
 		Return
 	EndIf
-	Local $aFolders = _FileListToArray($ProfilesPath, "*", $FLTA_FOLDERS)
-	Local Const $iSpacing = (EnvGet("AltLauncher_ButtonSpacing") <> "" ? Int(EnvGet("AltLauncher_ButtonSpacing")) : 4)
-	Local $iMaxPer = (EnvGet("AltLauncher_NumberOfButtonsPerDirection") <> "" ? Int(EnvGet("AltLauncher_NumberOfButtonsPerDirection")) : 5)
-	Local $iBtnW = (EnvGet("AltLauncher_ButtonWidth") <> "" ? Int(EnvGet("AltLauncher_ButtonWidth")) : 120)
-	Local $iBtnH = (EnvGet("AltLauncher_ButtonHeight") <> "" ? Int(EnvGet("AltLauncher_ButtonHeight")) : 55)
-	Global $iTotal = 0
+	$aFolders = _FileListToArray($ProfilesPath, "*", $FLTA_FOLDERS)
+	Const $iSpacing = (EnvGet("AltLauncher_ButtonSpacing") <> "" ? Int(EnvGet("AltLauncher_ButtonSpacing")) : 4)
+	$iMaxPer = (EnvGet("AltLauncher_NumberOfButtonsPerDirection") <> "" ? Int(EnvGet("AltLauncher_NumberOfButtonsPerDirection")) : 5)
+	$iButtonWidth = (EnvGet("AltLauncher_ButtonWidth") <> "" ? Int(EnvGet("AltLauncher_ButtonWidth")) : 120)
+	$iButtonHeight = (EnvGet("AltLauncher_ButtonHeight") <> "" ? Int(EnvGet("AltLauncher_ButtonHeight")) : 55)
+	$sLayout = (EnvGet("AltLauncher_ButtonDirection") <> "" ? EnvGet("AltLauncher_ButtonDirection") : "down")
+	Global $iNumOfProfiles = 0
 	If IsArray($aFolders) And UBound($aFolders) > 0 Then
-		$iTotal = $aFolders[0]
+		$iNumOfProfiles = $aFolders[0]
 	EndIf
-	Local $sLayout = (EnvGet("AltLauncher_ButtonDirection") <> "" ? EnvGet("AltLauncher_ButtonDirection") : "down")
-
 	Local $iCols, $iRows
 	If $sLayout = "right" Then
-		$iRows = Ceiling(($iTotal + 1) / $iMaxPer)
-		$iCols = _Min(($iTotal + 1), $iMaxPer)
+		$iRows = Ceiling(($iNumOfProfiles + 1) / $iMaxPer)
+		$iCols = _Min(($iNumOfProfiles + 1), $iMaxPer)
 	Else ;down
-		$iCols = Ceiling(($iTotal + 1) / $iMaxPer)
-		$iRows = _Min(($iTotal + 1), $iMaxPer)
+		$iCols = Ceiling(($iNumOfProfiles + 1) / $iMaxPer)
+		$iRows = _Min(($iNumOfProfiles + 1), $iMaxPer)
 	EndIf
-
-	Local $iWinW = ($iSpacing + $iBtnW + 1) * $iCols + $iSpacing + 2
-	Local $iWinH = ($iSpacing + $iBtnH) * $iRows + $iSpacing + 30
-	Local $hGUI = GUICreate($Title & " - Game: " & $Name, $iWinW, $iWinH, -1, -1, $WS_SYSMENU)
-	GUISetOnEvent($GUI_EVENT_CLOSE, "_CloseGUI")
+	$iWinW = ($iSpacing + $iButtonWidth + 1) * $iCols + $iSpacing + 2
+	$iWinH = ($iSpacing + $iButtonHeight) * $iRows + $iSpacing + 30
+	$hGUI = GUICreate($Title & " - Game: " & $Name, $iWinW, $iWinH, -1, -1, $WS_SYSMENU)
+	GUISetOnEvent($GUI_EVENT_CLOSE, "HideProfileSelect")
 	Local $iX = $iSpacing, $iY = $iSpacing
-	For $i = 1 To $iTotal + 1
-		If $i <= $iTotal Then
-			Local $sLabel = $aFolders[$i]
+	For $i = 1 To $iNumOfProfiles + 1
+		If $i <= $iNumOfProfiles Then
+			$sLabel = $aFolders[$i]
 		Else
-			Local $sLabel = "+"
+			$sLabel = "+"
 		EndIf
-		Local $iStyle = ($sLabel = $Profile) ? BitOR($WS_BORDER, $WS_TABSTOP) : $WS_TABSTOP
-		Local $hBtn = GUICtrlCreateButton($sLabel, $iX, $iY, $iBtnW, $iBtnH, $iStyle)
-		If GUICtrlSetOnEvent($hBtn, "_ButtonClick") = 0 Then
-			Exit MsgBox(0, "Error", "Can't register click event for: " & $sLabel & @CRLF & "[CtrlID]: " & $hBtn)
+		$iStyle = ($sLabel = $Profile) ? BitOR($WS_BORDER, $WS_TABSTOP) : $WS_TABSTOP
+		$hButton = GUICtrlCreateButton($sLabel, $iX, $iY, $iButtonWidth, $iButtonHeight, $iStyle)
+		If GUICtrlSetOnEvent($hButton, "ProfileSelected") = 0 Then
+			Exit MsgBox(0, "Error", "Can't register click event for: " & $sLabel & @CRLF & "[CtrlID]: " & $hButton)
 		EndIf
-
 		If $sLayout = "down" Then
-			$iY += $iBtnH + $iSpacing
+			$iY += $iButtonHeight + $iSpacing
 			If Mod($i, $iMaxPer) = 0 Then
 				$iY = $iSpacing
-				$iX += $iBtnW + $iSpacing
+				$iX += $iButtonWidth + $iSpacing
 			EndIf
 		Else
-			$iX += $iBtnW + $iSpacing
+			$iX += $iButtonWidth + $iSpacing
 			If Mod($i, $iMaxPer) = 0 Then
 				$iX = $iSpacing
-				$iY += $iBtnH + $iSpacing
+				$iY += $iButtonHeight + $iSpacing
 			EndIf
 		EndIf
 	Next
-	If $iTotal = 0 Then _ButtonClick()
+	If $iNumOfProfiles = 0 Then ProfileSelected()
 	GUISetState(@SW_SHOW)
-EndFunc   ;==>GuiInit
-Func _CloseGUI()
-	Exit
-EndFunc   ;==>_CloseGUI
-Func _ButtonClick()
+EndFunc   ;==>ProfileSelect
+Func ProfileSelected()
 	GUISetState(@SW_HIDE)
-	$Profile = ($iTotal = 0) ? "+" : GUICtrlRead(@GUI_CtrlId)
+	$Profile = ($iNumOfProfiles = 0) ? "+" : GUICtrlRead(@GUI_CtrlId)
 	$Profile_Set = True
 	If $Profile = "+" Then
 		Do
@@ -256,7 +247,10 @@ Func _ButtonClick()
 		DirCreate($ProfilesPath & '\' & $ChosenName)
 		$Profile = $ChosenName
 	EndIf
-EndFunc   ;==>_ButtonClick
+EndFunc   ;==>ProfileSelected
+Func HideProfileSelect()
+	Exit
+EndFunc   ;==>HideProfileSelect
 Func CreateProfileFolderIfEmpty()
 	DirCreate($ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name)
 EndFunc   ;==>CreateProfileFolderIfEmpty
@@ -285,12 +279,31 @@ Func ShowProgressBar()
 	$Title &= " - Profile: " & $Profile & " - Game: " & $Name
 	ProgressOn($Title, "Loading...", "", -1, -1, $DLG_NOTONTOP + $DLG_MOVEABLE)
 EndFunc   ;==>ShowProgressBar
-Func RunLauncherIfNeeded()
+Func Backup()
+	For $i = 1 To $Registry[0][0]
+		ProgressSet(($i / $Registry[0][0] * 33.33), $i & "/" & $Registry[0][0] & ": " & $Registry[$i][1])
+		Manage_Registry("Backup", $Registry, $i)
+	Next
+	For $i = 1 To $Directories[0][0]
+		ProgressSet(($i / $Directories[0][0] * 33.33 + 33.33), $i & "/" & $Directories[0][0] & ": " & $Directories[$i][1])
+		Manage_Directory("Backup", $Directories, $i)
+	Next
+	For $i = 1 To $Files[0][0]
+		ProgressSet(($i / $Files[0][0] * 33.33 + 66.66), $i & "/" & $Files[0][0] & ": " & $Files[$i][1])
+		Manage_File("Backup", $Files, $i)
+	Next
+EndFunc   ;==>Backup
+Func EnableChecks()
+	Global $EarlyExitCheck
+	AdlibRegister("EarlyExitCheck", 1000)
+	OnAutoItExitRegister("_Exit")
+EndFunc   ;==>EnableChecks
+Func RunLauncher()
 	If FileExists(@ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & "-launcher.cmd") Then
 		ProgressSet(100, "Starting Launcher...", "")
 		ShellExecuteWait(@ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & "-launcher.cmd", "", ($Path = Null) ? @ScriptDir : $Path, $SHEX_OPEN, @SW_HIDE)
 	EndIf
-EndFunc   ;==>RunLauncherIfNeeded
+EndFunc   ;==>RunLauncher
 Func RunGame()
 	ProgressSet(100, "Launching Game...", "")
 	ShellExecute($Executable, $LaunchFlags, ($Path = Null) ? @ScriptDir : $Path)
@@ -312,47 +325,39 @@ Func WaitWhileGameRunning()
 			Sleep(250)
 		WEnd
 	EndIf
-	ProgressSet(100, "Game Closed.")
 EndFunc   ;==>WaitWhileGameRunning
-Func Backup()
-	For $i = 1 To $Registry[0][0]
-		ProgressSet(($i / $Registry[0][0] * 33.33), $i & "/" & $Registry[0][0] & ": " & $Registry[$i][1])
-		Manage_Registry($backup, $Registry, $i)
-	Next
-	For $i = 1 To $Directories[0][0]
-		ProgressSet(($i / $Directories[0][0] * 33.33 + 33.33), $i & "/" & $Directories[0][0] & ": " & $Directories[$i][1])
-		Manage_Directory($backup, $Directories, $i)
-	Next
-	For $i = 1 To $Files[0][0]
-		ProgressSet(($i / $Files[0][0] * 33.33 + 66.66), $i & "/" & $Files[0][0] & ": " & $Files[$i][1])
-		Manage_File($backup, $Files, $i)
-	Next
-EndFunc   ;==>Backup
+Func WhenGameCloses()
+	WinActivate($Title)
+	WinSetOnTop($Title, "", $WINDOWS_ONTOP)
+	ProgressSet(100, "Game Closed.")
+	DisableChecks()
+	sleep(1000)
+EndFunc   ;==>doExit
 Func Restore()
 	If CheckStateFile() = True Then
 		For $i = 1 To $Registry[0][0]
 			ProgressSet(($i / $Registry[0][0] * 33.33), $i & "/" & $Registry[0][0] & ": " & $Registry[$i][1], "Saving...")
-			Manage_Registry($restore, $Registry, $i)
+			Manage_Registry("Restore", $Registry, $i)
 		Next
 		For $i = 1 To $Directories[0][0]
 			ProgressSet(($i / $Directories[0][0] * 33.33 + 33.33), $i & "/" & $Directories[0][0] & ": " & $Directories[$i][1])
-			Manage_Directory($restore, $Directories, $i)
+			Manage_Directory("Restore", $Directories, $i)
 		Next
 		For $i = 1 To $Files[0][0]
 			ProgressSet(($i / $Files[0][0] * 33.33 + 66.66), $i & "/" & $Files[0][0] & ": " & $Files[$i][1])
-			Manage_File($restore, $Files, $i)
+			Manage_File("Restore", $Files, $i)
 		Next
 		FileDelete(@ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & ".state")
 		ProgressSet(100, "Success")
 	EndIf
 EndFunc   ;==>Restore
 Func Manage_Registry($Mode, ByRef $Registry, ByRef $i)
-	Local $RegPath = $Registry[$i][1]
-	If $Mode = "backup" Then
+	$RegPath = $Registry[$i][1]
+	If $Mode = "Backup" Then
 		ShellExecuteWait("reg.exe", 'copy "' & $RegPath & '" "' & $RegPath & '.AltLauncher-Backup" /S /F', @ScriptDir, $SHEX_OPEN, @SW_HIDE)
 		ShellExecuteWait("reg.exe", 'delete "' & $RegPath & '" /F', @ScriptDir, $SHEX_OPEN, @SW_HIDE)
 		ShellExecuteWait("reg.exe", 'import "' & $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Registry[$i][0] & '.reg"', @ScriptDir, $SHEX_OPEN, @SW_HIDE)
-	ElseIf $Mode = "restore" Then
+	ElseIf $Mode = "Restore" Then
 		ShellExecuteWait("reg.exe", 'export "' & $RegPath & '" "' & $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Registry[$i][0] & '.reg" /Y', @ScriptDir, $SHEX_OPEN, @SW_HIDE)
 		ShellExecuteWait("reg.exe", 'delete "' & $RegPath & '" /F', @ScriptDir, $SHEX_OPEN, @SW_HIDE)
 		ShellExecuteWait("reg.exe", 'copy "' & $RegPath & '.AltLauncher-Backup" "' & $RegPath & '" /S /F', @ScriptDir, $SHEX_OPEN, @SW_HIDE)
@@ -360,16 +365,16 @@ Func Manage_Registry($Mode, ByRef $Registry, ByRef $i)
 	EndIf
 EndFunc   ;==>Manage_Registry
 Func Manage_Directory($Mode, ByRef $Directories, ByRef $i)
-	Local $DirPath = $Directories[$i][1]
-	Local $BackupPath = $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Directories[$i][0]
-	If $Mode = "backup" Then
+	$DirPath = $Directories[$i][1]
+	$BackupPath = $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Directories[$i][0]
+	If $Mode = "Backup" Then
 		If Not FileExists($DirPath) Then DirCreate($DirPath)
 		If Not FileExists($BackupPath) Then DirCreate($BackupPath)
 		If DirMove($DirPath, $DirPath & '.AltLauncher-Backup', $FC_OVERWRITE) = 0 Then
 			If FileWriteLine(@ScriptDir & "\" & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".log", "Backup failed! " & $DirPath & @CRLF) = 0 Then MsgBox(0, "error", "Backup failed! " & $DirPath)
 		EndIf
 		If DirCopy($BackupPath, $DirPath, $FC_OVERWRITE) = 0 Then FileWriteLine(@ScriptDir & "\" & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".log", "Transfer to game failed! " & $BackupPath & "=>" & $DirPath & @CRLF)
-	ElseIf $Mode = "restore" Then
+	ElseIf $Mode = "Restore" Then
 		If $UseRecyclingBin = "True" Then
 			If DirCopy($DirPath, $BackupPath, $FC_OVERWRITE) = 0 Then
 				FileWriteLine(@ScriptDir & "\" & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".log", "Transfer to game failed! " & $DirPath & "=>" & $BackupPath & @CRLF)
@@ -406,12 +411,12 @@ Func Manage_Directory($Mode, ByRef $Directories, ByRef $i)
 	EndIf
 EndFunc   ;==>Manage_Directory
 Func Manage_File($Mode, ByRef $Files, ByRef $i)
-	Local $FilePath = $Files[$i][1]
-	Local $BackupPath = $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Files[$i][0]
-	If $Mode = "backup" Then
+	$FilePath = $Files[$i][1]
+	$BackupPath = $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Files[$i][0]
+	If $Mode = "Backup" Then
 		FileMove($FilePath, $FilePath & '.AltLauncher-Backup', $FC_OVERWRITE + $FC_CREATEPATH)
 		FileCopy($BackupPath, $FilePath, $FC_OVERWRITE + $FC_CREATEPATH)
-	ElseIf $Mode = "restore" Then
+	ElseIf $Mode = "Restore" Then
 		If $UseRecyclingBin = "true" Then
 			FileMove($FilePath, $BackupPath, $FC_OVERWRITE + $FC_CREATEPATH)
 		Else
@@ -424,11 +429,10 @@ Func Manage_File($Mode, ByRef $Files, ByRef $i)
 		FileMove($FilePath & '.AltLauncher-Backup', $FilePath, $FC_OVERWRITE + $FC_CREATEPATH)
 	EndIf
 EndFunc   ;==>Manage_File
-Func EnableChecks()
-	Global $EarlyExitCheck
-	AdlibRegister("EarlyExitCheck", 1000)
-	OnAutoItExitRegister("OnExit")
-EndFunc   ;==>EnableChecks
+Func DisableChecks()
+	OnAutoItExitUnRegister("_Exit")
+	AdlibUnRegister("EarlyExitCheck")
+EndFunc
 Func EarlyExitCheck()
 	If _IsPressed("1B") Then ;Escape Key
 		$EarlyExitCheck += 1
@@ -437,21 +441,18 @@ Func EarlyExitCheck()
 	EndIf
 	If $EarlyExitCheck >= 5 Then
 		ProgressSet(100, "Early Exit Triggered!")
-		doExit()
+		sleep(1000)
+		WhenGameCloses()
 	EndIf
 EndFunc   ;==>EarlyExitCheck
-Func OnExit()
-	doExit(True)
-EndFunc   ;==>OnExit
-Func doExit($immediately = False)
-	OnAutoItExitUnRegister("OnExit")
-	AdlibUnRegister("EarlyExitCheck")
+Func _Exit()
 	WinActivate($Title)
 	WinSetOnTop($Title, "", $WINDOWS_ONTOP)
-	If $immediately = False Then Sleep(1000)
+	DisableChecks()
 	Restore()
-	Exit Sleep(($immediately = True) ? 0 : 3000)
-EndFunc   ;==>doExit
+	sleep(1000)
+	Exit
+EndFunc   ;==>_Exit
 Func ExitMSG($msg)
 	Exit MsgBox($MB_OK + $MB_ICONERROR + $MB_SYSTEMMODAL, "AltLauncher", $msg)
 EndFunc   ;==>ExitMSG
