@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.2.1.1
+#AutoIt3Wrapper_Res_Fileversion=0.2.1.2
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
@@ -16,6 +16,7 @@ Opt("GUIOnEventMode", True)
 Opt("TrayIconHide", True)
 Opt("ExpandEnvStrings", True)
 Global $Title = "AltLauncher", $Profile_Set = False
+UpdateOldEnvironmentVariables()
 ReadEnvironmentVariables()
 If RegRead("HKCU\Environment", "AltLauncher_Path") = "" Then Setup()
 ReadConfig()
@@ -35,7 +36,7 @@ RunGame()
 WaitWhileGameRunning()
 WhenGameCloses()
 Restore()
-sleep(2000)
+Sleep(2000)
 Exit
 Func ReadINISection(ByRef $Ini, $Section)
 	$Data = IniReadSection($Ini, $Section)
@@ -45,11 +46,18 @@ Func ReadINISection(ByRef $Ini, $Section)
 	EndIf
 	Return $Data
 EndFunc   ;==>ReadINISection
+Func UpdateOldEnvironmentVariables()
+	If RegRead("HKCU\Environment", "AltLauncher_UseRecyclingBin") Then
+		RegWrite("HKCU\Environment", "AltLauncher_SafeMode", "REG_SZ", RegRead("HKCU\Environment", "AltLauncher_UseRecyclingBin"))
+		RegDelete("HKCU\Environment", "AltLauncher_UseRecyclingBin")
+	EndIf
+EndFunc   ;==>UpdateOldEnvironmentVariables
 Func ReadEnvironmentVariables()
 	EnvSet("SteamID3", RegRead("HKCU\Environment", "SteamID3"))
 	EnvSet("SteamID64", RegRead("HKCU\Environment", "SteamID64"))
 	EnvSet("UbisoftID", RegRead("HKCU\Environment", "UbisoftID"))
 	EnvSet("RockstarID", RegRead("HKCU\Environment", "RockstarID"))
+	EnvSet("AltLauncher_SafeMode", RegRead("HKCU\Environment", "AltLauncher_SafeMode"))
 	EnvSet("AltLauncher_UseProfileFile", RegRead("HKCU\Environment", "AltLauncher_UseProfileFile"))
 	EnvSet("AltLauncher_ButtonWidth", RegRead("HKCU\Environment", "AltLauncher_ButtonWidth"))
 	EnvSet("AltLauncher_ButtonHeight", RegRead("HKCU\Environment", "AltLauncher_ButtonHeight"))
@@ -84,7 +92,7 @@ Func ReadConfig()
 	Global $LaunchFlags = IniRead($Ini, "General", "LaunchFlags", Null)
 	Global $MinWait = IniRead($Ini, "Settings", "MinWait", 0)
 	Global $MaxWait = IniRead($Ini, "Settings", "MaxWait", 0)
-	Global $UseRecyclingBin = IniRead($Ini, "Settings", "UseRecyclingBin", (RegRead("HKCU\Environment", "AltLauncher_UseRecyclingBin") <> "") ? RegRead("HKCU\Environment", "AltLauncher_UseRecyclingBin") : Null)
+	Global $SafeMode = IniRead($Ini, "Settings", "SafeMode", (RegRead("HKCU\Environment", "AltLauncher_SafeMode") <> "") ? RegRead("HKCU\Environment", "AltLauncher_SafeMode") : Null)
 	Global $ProfilesPath = IniRead($Ini, "Profiles", "Path", (RegRead("HKCU\Environment", "AltLauncher_Path") <> "") ? RegRead("HKCU\Environment", "AltLauncher_Path") : "C:\AltLauncher")
 	Global $ProfilesSubPath = IniRead($Ini, "Profiles", "SubPath", RegRead("HKCU\Environment", "AltLauncher_SubPath"))
 	Global $Profile = ""
@@ -331,8 +339,12 @@ Func WhenGameCloses()
 	WinSetOnTop($Title, "", $WINDOWS_ONTOP)
 	ProgressSet(100, "Game Closed.")
 	DisableChecks()
-	sleep(1000)
-EndFunc   ;==>doExit
+	Sleep(1000)
+EndFunc   ;==>WhenGameCloses
+Func DisableChecks()
+	OnAutoItExitUnRegister("_Exit")
+	AdlibUnRegister("EarlyExitCheck")
+EndFunc   ;==>DisableChecks
 Func Restore()
 	If CheckStateFile() = True Then
 		For $i = 1 To $Registry[0][0]
@@ -353,36 +365,32 @@ Func Restore()
 EndFunc   ;==>Restore
 Func Manage_Registry($Mode, ByRef $Registry, ByRef $i)
 	$RegPath = $Registry[$i][1]
-	If $Mode = "Backup" Then
-		ShellExecuteWait("reg.exe", 'copy "' & $RegPath & '" "' & $RegPath & '.AltLauncher-Backup" /S /F', @ScriptDir, $SHEX_OPEN, @SW_HIDE)
-		ShellExecuteWait("reg.exe", 'delete "' & $RegPath & '" /F', @ScriptDir, $SHEX_OPEN, @SW_HIDE)
-		ShellExecuteWait("reg.exe", 'import "' & $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Registry[$i][0] & '.reg"', @ScriptDir, $SHEX_OPEN, @SW_HIDE)
-	ElseIf $Mode = "Restore" Then
-		ShellExecuteWait("reg.exe", 'export "' & $RegPath & '" "' & $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Registry[$i][0] & '.reg" /Y', @ScriptDir, $SHEX_OPEN, @SW_HIDE)
-		ShellExecuteWait("reg.exe", 'delete "' & $RegPath & '" /F', @ScriptDir, $SHEX_OPEN, @SW_HIDE)
-		ShellExecuteWait("reg.exe", 'copy "' & $RegPath & '.AltLauncher-Backup" "' & $RegPath & '" /S /F', @ScriptDir, $SHEX_OPEN, @SW_HIDE)
-		ShellExecuteWait("reg.exe", 'delete "' & $RegPath & '.AltLauncher-Backup" /F', @ScriptDir, $SHEX_OPEN, @SW_HIDE)
-	EndIf
+	$BackupPath = $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Registry[$i][0]
+	Switch $Mode
+		Case "Backup"
+			ShellExecuteWait("reg.exe", 'copy "' & $RegPath & '" "' & $RegPath & '.AltLauncher-Backup" /S /F', @ScriptDir, $SHEX_OPEN, @SW_HIDE)
+			ShellExecuteWait("reg.exe", 'delete "' & $RegPath & '" /F', @ScriptDir, $SHEX_OPEN, @SW_HIDE)
+			ShellExecuteWait("reg.exe", 'import "' & $BackupPath & '.reg"', @ScriptDir, $SHEX_OPEN, @SW_HIDE)
+		Case "Restore"
+			ShellExecuteWait("reg.exe", 'export "' & $RegPath & '" "' & $BackupPath & '.reg" /Y', @ScriptDir, $SHEX_OPEN, @SW_HIDE)
+			ShellExecuteWait("reg.exe", 'delete "' & $RegPath & '" /F', @ScriptDir, $SHEX_OPEN, @SW_HIDE)
+			ShellExecuteWait("reg.exe", 'copy "' & $RegPath & '.AltLauncher-Backup" "' & $RegPath & '" /S /F', @ScriptDir, $SHEX_OPEN, @SW_HIDE)
+			ShellExecuteWait("reg.exe", 'delete "' & $RegPath & '.AltLauncher-Backup" /F', @ScriptDir, $SHEX_OPEN, @SW_HIDE)
+	EndSwitch
 EndFunc   ;==>Manage_Registry
 Func Manage_Directory($Mode, ByRef $Directories, ByRef $i)
 	$DirPath = $Directories[$i][1]
 	$BackupPath = $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Directories[$i][0]
-	If $Mode = "Backup" Then
-		If Not FileExists($DirPath) Then DirCreate($DirPath)
-		If Not FileExists($BackupPath) Then DirCreate($BackupPath)
-		If DirMove($DirPath, $DirPath & '.AltLauncher-Backup', $FC_OVERWRITE) = 0 Then
-			If FileWriteLine(@ScriptDir & "\" & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".log", "Backup failed! " & $DirPath & @CRLF) = 0 Then MsgBox(0, "error", "Backup failed! " & $DirPath)
-		EndIf
-		If DirCopy($BackupPath, $DirPath, $FC_OVERWRITE) = 0 Then FileWriteLine(@ScriptDir & "\" & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".log", "Transfer to game failed! " & $BackupPath & "=>" & $DirPath & @CRLF)
-	ElseIf $Mode = "Restore" Then
-		If $UseRecyclingBin = "True" Then
-			If DirCopy($DirPath, $BackupPath, $FC_OVERWRITE) = 0 Then
-				FileWriteLine(@ScriptDir & "\" & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".log", "Transfer to game failed! " & $DirPath & "=>" & $BackupPath & @CRLF)
-			EndIf
-		Else
+	Switch $Mode
+		Case "Backup"
+			If Not FileExists($DirPath) Then DirCreate($DirPath)
+			If Not FileExists($BackupPath) Then DirCreate($BackupPath)
+			DirMove($DirPath, $DirPath & '.AltLauncher-Backup', $FC_OVERWRITE)
+			DirCopy($BackupPath, $DirPath, $FC_OVERWRITE)
+		Case "Restore"
 			$GameFileList = _FileListToArrayRec($DirPath, "*", $FLTAR_FILES, $FLTAR_RECUR)
 			For $j = UBound($GameFileList) - 1 To 1 Step -1
-				If FileCopy($DirPath & '\' & $GameFileList[$j], $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Directories[$i][0] & '\' & $GameFileList[$j], $FC_OVERWRITE + $FC_CREATEPATH) = 0 Then FileWrite(@ScriptDir & "\" & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".log", "Transfer to profile failed! " & $DirPath & '\' & $GameFileList[$j] & "=>" & $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Directories[$i][0] & '\' & $GameFileList[$j] & @CRLF)
+				FileCopy($DirPath & '\' & $GameFileList[$j], $BackupPath & '\' & $GameFileList[$j], $FC_OVERWRITE + $FC_CREATEPATH)
 			Next
 			$ProfileFileList = _FileListToArrayRec($BackupPath, "*", $FLTAR_FILES, $FLTAR_RECUR)
 			For $j = UBound($ProfileFileList) - 1 To 1 Step -1
@@ -390,49 +398,51 @@ Func Manage_Directory($Mode, ByRef $Directories, ByRef $i)
 					_ArrayDelete($ProfileFileList, $j)
 				EndIf
 			Next
-			For $j = UBound($ProfileFileList) - 1 To 1 Step -1
-				If $UseRecyclingBin = "False" Then
-					FileDelete($ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Directories[$i][0] & '\' & $ProfileFileList[$j])
-				Else
-					FileRecycle($ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Directories[$i][0] & '\' & $ProfileFileList[$j])
-				EndIf
-			Next
-			$FolderCleanupList = _FileListToArrayRec($BackupPath, "*", $FLTA_FOLDERS, $FLTAR_RECUR)
-			For $j = UBound($FolderCleanupList) - 1 To 1 Step -1
-				DirRemove($BackupPath & $FolderCleanupList[$j], $DIR_DEFAULT)
-			Next
-		EndIf
-		If $UseRecyclingBin = "False" Then
+			Switch $SafeMode
+				Case "True"
+					For $j = UBound($ProfileFileList) - 1 To 1 Step -1
+						FileRecycle($BackupPath & '\' & $ProfileFileList[$j])
+					Next
+					$FolderCleanupList = _FileListToArrayRec($BackupPath, "*", $FLTA_FOLDERS, $FLTAR_RECUR)
+					For $j = UBound($FolderCleanupList) - 1 To 1 Step -1
+						FileRecycle($BackupPath & $FolderCleanupList[$j])
+					Next
+				Case "False"
+					For $j = UBound($ProfileFileList) - 1 To 1 Step -1
+						FileDelete($BackupPath & '\' & $ProfileFileList[$j])
+					Next
+					$FolderCleanupList = _FileListToArrayRec($BackupPath, "*", $FLTA_FOLDERS, $FLTAR_RECUR)
+					For $j = UBound($FolderCleanupList) - 1 To 1 Step -1
+						DirRemove($BackupPath & $FolderCleanupList[$j], $DIR_DEFAULT)
+					Next
+				Case Null
+					FileMove($DirPath, $BackupPath, $FC_OVERWRITE + $FC_CREATEPATH)
+					FileRecycle($DirPath)
+			EndSwitch
 			DirRemove($DirPath, $DIR_REMOVE)
-		Else
-			FileRecycle($DirPath)
-		EndIf
-		If DirMove($DirPath & '.AltLauncher-Backup', $DirPath) = 0 Then FileWriteLine(@ScriptDir & "\" & StringLeft(@ScriptName, StringInStr(@ScriptName, ".", 0, -1) - 1) & ".log", "Restore Failed! " & $DirPath & @CRLF)
-	EndIf
+			DirMove($DirPath & '.AltLauncher-Backup', $DirPath)
+	EndSwitch
 EndFunc   ;==>Manage_Directory
 Func Manage_File($Mode, ByRef $Files, ByRef $i)
 	$FilePath = $Files[$i][1]
 	$BackupPath = $ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name & '\' & $Files[$i][0]
-	If $Mode = "Backup" Then
-		FileMove($FilePath, $FilePath & '.AltLauncher-Backup', $FC_OVERWRITE + $FC_CREATEPATH)
-		FileCopy($BackupPath, $FilePath, $FC_OVERWRITE + $FC_CREATEPATH)
-	ElseIf $Mode = "Restore" Then
-		If $UseRecyclingBin = "true" Then
-			FileMove($FilePath, $BackupPath, $FC_OVERWRITE + $FC_CREATEPATH)
-		Else
-			If $UseRecyclingBin = "False" Then
-				FileDelete($BackupPath)
+	Switch $Mode
+		Case "Backup"
+			FileMove($FilePath, $FilePath & '.AltLauncher-Backup', $FC_OVERWRITE + $FC_CREATEPATH)
+			FileCopy($BackupPath, $FilePath, $FC_OVERWRITE + $FC_CREATEPATH)
+		Case "Restore"
+			If $SafeMode = "true" Then
+				FileMove($FilePath, $BackupPath, $FC_OVERWRITE + $FC_CREATEPATH)
 			Else
-				FileRecycle($BackupPath)
+				If $SafeMode = "False" Then
+					FileDelete($BackupPath)
+				Else
+					FileRecycle($BackupPath)
+				EndIf
 			EndIf
-		EndIf
-		FileMove($FilePath & '.AltLauncher-Backup', $FilePath, $FC_OVERWRITE + $FC_CREATEPATH)
-	EndIf
+			FileMove($FilePath & '.AltLauncher-Backup', $FilePath, $FC_OVERWRITE + $FC_CREATEPATH)
+	EndSwitch
 EndFunc   ;==>Manage_File
-Func DisableChecks()
-	OnAutoItExitUnRegister("_Exit")
-	AdlibUnRegister("EarlyExitCheck")
-EndFunc
 Func EarlyExitCheck()
 	If _IsPressed("1B") Then ;Escape Key
 		$EarlyExitCheck += 1
@@ -441,7 +451,7 @@ Func EarlyExitCheck()
 	EndIf
 	If $EarlyExitCheck >= 5 Then
 		ProgressSet(100, "Early Exit Triggered!")
-		sleep(1000)
+		Sleep(1000)
 		WhenGameCloses()
 	EndIf
 EndFunc   ;==>EarlyExitCheck
@@ -450,7 +460,7 @@ Func _Exit()
 	WinSetOnTop($Title, "", $WINDOWS_ONTOP)
 	DisableChecks()
 	Restore()
-	sleep(1000)
+	Sleep(1000)
 	Exit
 EndFunc   ;==>_Exit
 Func ExitMSG($msg)
@@ -461,13 +471,13 @@ Func Setup()
 	MsgBox(0, $Title, "Please select where you want your save slots to be stored on the next window.")
 	RegWrite("HKCU\Environment", "AltLauncher_Path", "REG_SZ", FileSelectFolder($Title, "", $FSF_CREATEBUTTON, "C:\AltLauncher"))
 	RegWrite("HKCU\Environment", "AltLauncher_SubPath", "REG_SZ", InputBox($Title, "If you need to set up a sub-path, enter it now." & @CRLF & "If you don't need this, leave blank and click ok."))
-	Switch MsgBox(3, $Title, "Would you like to use the Recycling Bin when erasing a save slot?" & @CRLF & @CRLF & "Click 'Yes' to use the Recycling Bin." & @CRLF & "Click 'No' to permanently delete erased slots." & @CRLF & "Click 'Cancel' will preserve any erased save slots, restoring them on the next launch.")
+	Switch MsgBox(3, $Title, "Would you like to use the Recycling Bin when erasing a save slot?" & @CRLF & @CRLF & "Click 'Yes' to use the Recycling Bin." & @CRLF & "Click 'No' to permanently delete erased save slots." & @CRLF & "Click 'Cancel' will preserve any erased save slots, restoring them on the next launch.")
 		Case $IDYES
-			RegWrite("HKCU\Environment", "AltLauncher_UseRecyclingBin", "REG_SZ", "True")
+			RegWrite("HKCU\Environment", "AltLauncher_SafeMode", "REG_SZ", "True")
 		Case $IDNO
-			RegWrite("HKCU\Environment", "AltLauncher_UseRecyclingBin", "REG_SZ", "False")
+			RegWrite("HKCU\Environment", "AltLauncher_SafeMode", "REG_SZ", "False")
 		Case $IDCANCEL
-			RegDelete("HKCU\Environment", "AltLauncher_UseRecyclingBin")
+			RegDelete("HKCU\Environment", "AltLauncher_SafeMode")
 	EndSwitch
 	Switch MsgBox(4, $Title, "Would you like to be asked which profile you would like to load each time you start a game?")
 		Case $IDYES
