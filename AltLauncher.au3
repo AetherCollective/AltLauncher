@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.2.1.2
+#AutoIt3Wrapper_Res_Fileversion=0.2.1.3
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
@@ -431,15 +431,15 @@ Func Manage_File($Mode, ByRef $Files, ByRef $i)
 			FileMove($FilePath, $FilePath & '.AltLauncher-Backup', $FC_OVERWRITE + $FC_CREATEPATH)
 			FileCopy($BackupPath, $FilePath, $FC_OVERWRITE + $FC_CREATEPATH)
 		Case "Restore"
-			If $SafeMode = "true" Then
-				FileMove($FilePath, $BackupPath, $FC_OVERWRITE + $FC_CREATEPATH)
-			Else
-				If $SafeMode = "False" Then
-					FileDelete($BackupPath)
-				Else
-					FileRecycle($BackupPath)
-				EndIf
-			EndIf
+			$FileExists = FileExists($FilePath)
+			FileMove($FilePath, $BackupPath, $FC_OVERWRITE + $FC_CREATEPATH)
+			Switch $SafeMode
+				Case "True"
+					If Not $FileExists Then FileRecycle($BackupPath)
+				Case "False"
+					If Not $FileExists Then	FileDelete($BackupPath)
+				Case Null
+			EndSwitch
 			FileMove($FilePath & '.AltLauncher-Backup', $FilePath, $FC_OVERWRITE + $FC_CREATEPATH)
 	EndSwitch
 EndFunc   ;==>Manage_File
