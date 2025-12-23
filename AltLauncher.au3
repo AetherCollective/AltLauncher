@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.2.1.4
+#AutoIt3Wrapper_Res_Fileversion=0.2.1.5
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
@@ -59,6 +59,7 @@ Func ReadEnvironmentVariables()
 	EnvSet("UbisoftID", RegRead("HKCU\Environment", "UbisoftID"))
 	EnvSet("RockstarID", RegRead("HKCU\Environment", "RockstarID"))
 	EnvSet("AltLauncher_SafeMode", RegRead("HKCU\Environment", "AltLauncher_SafeMode"))
+	EnvSet("AltLauncher_SwitchMode", RegRead("HKCU\Environment", "AltLauncher_SwitchMode"))
 	EnvSet("AltLauncher_UseProfileFile", RegRead("HKCU\Environment", "AltLauncher_UseProfileFile"))
 	EnvSet("AltLauncher_ButtonWidth", RegRead("HKCU\Environment", "AltLauncher_ButtonWidth"))
 	EnvSet("AltLauncher_ButtonHeight", RegRead("HKCU\Environment", "AltLauncher_ButtonHeight"))
@@ -348,7 +349,8 @@ Func DisableChecks()
 	AdlibUnRegister("EarlyExitCheck")
 EndFunc   ;==>DisableChecks
 Func RedirectHook()
-	If _IsPressed("10") Then
+	$SwitchMode = (EnvGet("AltLauncher_SwitchMode") <> "" ? Int(EnvGet("AltLauncher_SwitchMode")) : "False")
+	If $SwitchMode = "True" Or _IsPressed("10") Then
 		WinSetOnTop($Title, "", $WINDOWS_NOONTOP)
 		Global $StoredProfile = $Profile
 		$Profile = ""
