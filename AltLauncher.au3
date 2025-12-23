@@ -468,7 +468,6 @@ Func Manage_File($Mode, ByRef $Files, ByRef $i)
 				Case "True"
 					If Not $FileExists Then FileRecycle($BackupPath)
 				Case "False"
-					If Not $FileExists Then	FileDelete($BackupPath)
 					If Not $FileExists Then FileDelete($BackupPath)
 				Case Null
 			EndSwitch
