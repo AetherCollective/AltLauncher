@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.2.1.3
+#AutoIt3Wrapper_Res_Fileversion=0.2.1.4
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
@@ -15,7 +15,8 @@
 Opt("GUIOnEventMode", True)
 Opt("TrayIconHide", True)
 Opt("ExpandEnvStrings", True)
-Global $Title = "AltLauncher", $Profile_Set = False
+Global $ProductName = "AltLauncher", $Profile_Set = False
+Global $Title = $ProductName
 UpdateOldEnvironmentVariables()
 ReadEnvironmentVariables()
 If RegRead("HKCU\Environment", "AltLauncher_Path") = "" Then Setup()
@@ -202,8 +203,8 @@ Func ProfileSelect()
 	EndIf
 	$iWinW = ($iSpacing + $iButtonWidth + 1) * $iCols + $iSpacing + 2
 	$iWinH = ($iSpacing + $iButtonHeight) * $iRows + $iSpacing + 30
-	$hGUI = GUICreate($Title & " - Game: " & $Name, $iWinW, $iWinH, -1, -1, $WS_SYSMENU)
-	GUISetOnEvent($GUI_EVENT_CLOSE, "HideProfileSelect")
+	Global $hGUI = GUICreate($Title & " - Game: " & $Name, $iWinW, $iWinH, -1, -1, $WS_SYSMENU)
+	GUISetOnEvent($GUI_EVENT_CLOSE, "SilentExit", $hGUI)
 	Local $iX = $iSpacing, $iY = $iSpacing
 	For $i = 1 To $iNumOfProfiles + 1
 		If $i <= $iNumOfProfiles Then
@@ -256,9 +257,9 @@ Func ProfileSelected()
 		$Profile = $ChosenName
 	EndIf
 EndFunc   ;==>ProfileSelected
-Func HideProfileSelect()
+Func SilentExit()
 	Exit
-EndFunc   ;==>HideProfileSelect
+EndFunc   ;==>SilentExit
 Func CreateProfileFolderIfEmpty()
 	DirCreate($ProfilesPath & '\' & $Profile & '\' & $ProfilesSubPath & '\' & $Name)
 EndFunc   ;==>CreateProfileFolderIfEmpty
@@ -284,7 +285,7 @@ Func WriteStateFile()
 	FileWrite(@ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & ".state", $Profile)
 EndFunc   ;==>WriteStateFile
 Func ShowProgressBar()
-	$Title &= " - Profile: " & $Profile & " - Game: " & $Name
+	$Title = $ProductName & " - Profile: " & $Profile & " - Game: " & $Name
 	ProgressOn($Title, "Loading...", "", -1, -1, $DLG_NOTONTOP + $DLG_MOVEABLE)
 EndFunc   ;==>ShowProgressBar
 Func Backup()
@@ -340,11 +341,41 @@ Func WhenGameCloses()
 	ProgressSet(100, "Game Closed.")
 	DisableChecks()
 	Sleep(1000)
+	RedirectHook()
 EndFunc   ;==>WhenGameCloses
 Func DisableChecks()
 	OnAutoItExitUnRegister("_Exit")
 	AdlibUnRegister("EarlyExitCheck")
 EndFunc   ;==>DisableChecks
+Func RedirectHook()
+	If _IsPressed("10") Then
+		WinSetOnTop($Title, "", $WINDOWS_NOONTOP)
+		Global $StoredProfile = $Profile
+		$Profile = ""
+		$Profile_Set = False
+		ProfileSelect()
+		GUISetOnEvent($GUI_EVENT_CLOSE, "CancelRedirect", $hGUI)
+		Do
+			Sleep(100)
+		Until $Profile_Set = True
+		WinSetOnTop($Title, "", $WINDOWS_ONTOP)
+		CreateProfileFolderIfEmpty()
+		WriteStateFile()
+		$Title = $ProductName & " - Profile: " & $Profile & " - Game: " & $Name
+		ProgressOn($Title, "Saving...", "", -1, -1, $DLG_NOTONTOP + $DLG_MOVEABLE)
+	EndIf
+EndFunc   ;==>RedirectHook
+Func CancelRedirect()
+	$iret = MsgBox($MB_ICONQUESTION + $MB_YESNO, $Title, "Are you sure? This will send the save files to " & $StoredProfile & "'s folder.")
+	Switch $iret
+		Case $IDYES
+			$Profile = $StoredProfile
+			$Profile_Set = True
+			GUISetState(@SW_HIDE)
+		Case $IDNO
+			$Profile = ""
+	EndSwitch
+EndFunc   ;==>CancelRedirect
 Func Restore()
 	If CheckStateFile() = True Then
 		For $i = 1 To $Registry[0][0]
@@ -438,6 +469,7 @@ Func Manage_File($Mode, ByRef $Files, ByRef $i)
 					If Not $FileExists Then FileRecycle($BackupPath)
 				Case "False"
 					If Not $FileExists Then	FileDelete($BackupPath)
+					If Not $FileExists Then FileDelete($BackupPath)
 				Case Null
 			EndSwitch
 			FileMove($FilePath & '.AltLauncher-Backup', $FilePath, $FC_OVERWRITE + $FC_CREATEPATH)
