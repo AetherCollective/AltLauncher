@@ -28,7 +28,7 @@ AltLauncher needs to set up before being used. Simply run it to be guided throug
 
 ## 4. Launch the game, pick your user, and enjoy.
 
-AltLauncher will handle swapping saves and configs automatically. If you run into an error, [let us know](https://github.com/AetherCollective/AltLauncher-Templates/issues/new/choose)!
+AltLauncher will handle swapping saves and configs automatically. If you run into an error, [let us know](https://github.com/AetherCollective/AltLauncher/issues/new/choose)!
 
 ## Extra: Switching users mid‑play
 
