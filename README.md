@@ -1,6 +1,8 @@
 # AltLauncher Documentation
 
+[Quick Start](https://github.com/AetherCollective/AltLauncher/blob/main/quick-start.md)  
 [Templates](https://github.com/aethercollective/altlauncher-templates)  
+[Extra Documentation](https://github.com/AetherCollective/AltLauncher/blob/main/extra-documentation.md)  
 [Discord](https://discord.gg/zVAa2vkU5M)
 
 ## Introduction
