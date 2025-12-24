@@ -2,7 +2,7 @@
 name: Game Request
 about: Request support for your game
 title: Game Request
-labels: ''
+labels: game request
 assignees: AetherCollective
 
 ---

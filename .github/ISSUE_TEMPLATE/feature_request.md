@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest an idea for this project
 title: "[Feedback] "
-labels: feedback
+labels: feedback, issue
 assignees: AetherCollective
 
 ---
