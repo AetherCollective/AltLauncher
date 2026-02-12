@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.2.1.5
+#AutoIt3Wrapper_Res_Fileversion=0.2.1.6
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
@@ -349,8 +349,8 @@ Func DisableChecks()
 	AdlibUnRegister("EarlyExitCheck")
 EndFunc   ;==>DisableChecks
 Func RedirectHook()
-	$SwitchMode = (EnvGet("AltLauncher_SwitchMode") <> "" ? Int(EnvGet("AltLauncher_SwitchMode")) : "False")
-	If $SwitchMode = "True" Or _IsPressed("10") Then
+	Local $SwitchMode = (StringLower(EnvGet("AltLauncher_SwitchMode")) = "true")
+	If $SwitchMode Or _IsPressed("10") Then
 		WinSetOnTop($Title, "", $WINDOWS_NOONTOP)
 		Global $StoredProfile = $Profile
 		$Profile = ""
