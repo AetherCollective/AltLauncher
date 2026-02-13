@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.2.1.6
+#AutoIt3Wrapper_Res_Fileversion=0.2.1.7
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
@@ -94,6 +94,7 @@ Func ReadConfig()
 	Global $LaunchFlags = IniRead($Ini, "General", "LaunchFlags", Null)
 	Global $MinWait = IniRead($Ini, "Settings", "MinWait", 0)
 	Global $MaxWait = IniRead($Ini, "Settings", "MaxWait", 0)
+	Global $SaveDelay = IniRead($Ini, "Settings", "SaveDelay", 0)
 	Global $SafeMode = IniRead($Ini, "Settings", "SafeMode", (RegRead("HKCU\Environment", "AltLauncher_SafeMode") <> "") ? RegRead("HKCU\Environment", "AltLauncher_SafeMode") : Null)
 	Global $ProfilesPath = IniRead($Ini, "Profiles", "Path", (RegRead("HKCU\Environment", "AltLauncher_Path") <> "") ? RegRead("HKCU\Environment", "AltLauncher_Path") : "C:\AltLauncher")
 	Global $ProfilesSubPath = IniRead($Ini, "Profiles", "SubPath", RegRead("HKCU\Environment", "AltLauncher_SubPath"))
@@ -341,7 +342,7 @@ Func WhenGameCloses()
 	WinSetOnTop($Title, "", $WINDOWS_ONTOP)
 	ProgressSet(100, "Game Closed.")
 	DisableChecks()
-	Sleep(1000)
+	Sleep(1000 + $SaveDelay)
 	RedirectHook()
 EndFunc   ;==>WhenGameCloses
 Func DisableChecks()
