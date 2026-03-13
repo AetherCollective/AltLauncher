@@ -82,9 +82,11 @@ LaunchFlags=-some_flag
 [Settings]
 MinWait=5
 MaxWait=10
+SaveDelay=3500
 ```
 
 -   **`MinWait` / `MaxWait`**: Overrides how long AltLauncher waits before confirming the game has closed.
+-   **`SaveDelay`**: Overrides how long AltLauncher waits after the game has closed before moving save files.
 
 **Profile Management**
 
