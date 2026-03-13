@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.2.1.7
+#AutoIt3Wrapper_Res_Fileversion=0.2.1.8
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
@@ -96,6 +96,7 @@ Func ReadConfig()
 	Global $MaxWait = IniRead($Ini, "Settings", "MaxWait", 0)
 	Global $SaveDelay = IniRead($Ini, "Settings", "SaveDelay", 0)
 	Global $SafeMode = IniRead($Ini, "Settings", "SafeMode", (RegRead("HKCU\Environment", "AltLauncher_SafeMode") <> "") ? RegRead("HKCU\Environment", "AltLauncher_SafeMode") : Null)
+	Global $SwitchMode = IniRead($Ini, "Settings", "SwitchMode", (RegRead("HKCU\Environment", "AltLauncher_SwitchMode") <> "") ? RegRead("HKCU\Environment", "AltLauncher_SwitchMode") : "False")
 	Global $ProfilesPath = IniRead($Ini, "Profiles", "Path", (RegRead("HKCU\Environment", "AltLauncher_Path") <> "") ? RegRead("HKCU\Environment", "AltLauncher_Path") : "C:\AltLauncher")
 	Global $ProfilesSubPath = IniRead($Ini, "Profiles", "SubPath", RegRead("HKCU\Environment", "AltLauncher_SubPath"))
 	Global $Profile = ""
@@ -350,8 +351,7 @@ Func DisableChecks()
 	AdlibUnRegister("EarlyExitCheck")
 EndFunc   ;==>DisableChecks
 Func RedirectHook()
-	Local $SwitchMode = (StringLower(EnvGet("AltLauncher_SwitchMode")) = "true")
-	If $SwitchMode Or _IsPressed("10") Then
+	If $SwitchMode = "True" Or _IsPressed("10") Then
 		WinSetOnTop($Title, "", $WINDOWS_NOONTOP)
 		Global $StoredProfile = $Profile
 		$Profile = ""
