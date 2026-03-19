@@ -1,238 +1,257 @@
-# AltLauncher Documentation
+# AltLauncher
 
-[Quick Start](https://github.com/AetherCollective/AltLauncher/blob/main/quick-start.md)  
-[Templates](https://github.com/aethercollective/altlauncher-templates)  
-[Extra Documentation](https://github.com/AetherCollective/AltLauncher/blob/main/extra-documentation.md)  
-[Discord](https://discord.gg/zVAa2vkU5M)
+A save file manager for games that don't natively support multiple save profiles. AltLauncher lets multiple people share one PC and one game installation while keeping their save files, settings, and progress completely separate.
 
-## Introduction
-**AltLauncher** is a utility designed to streamline the profile management of games by handling registry modifications, directory adjustments, and file operations. This documentation will guide users through setting up and configuring AltLauncher for use with their preferred games.
+---
 
-YouTube Video: https://www.youtube.com/watch?v=l9H_WKFcTcQ
+## What is it for?
 
-![Downloads](https://img.shields.io/github/downloads/AetherCollective/AltLauncher/total.svg)
+Most games only support a single set of save files per installation. If multiple people play the same game on the same computer, they either overwrite each other's saves or have to manually back things up. AltLauncher solves this by swapping save files in and out automatically - before the game launches, it loads the selected person's saves; after the game closes, it saves them back.
 
-[![YouTube Video](https://img.youtube.com/vi/l9H_WKFcTcQ/maxresdefault.jpg)](https://www.youtube.com/watch?v=l9H_WKFcTcQ)
+The result is that each person gets their own independent game experience: separate progression, separate settings, separate everything. From the game's perspective, nothing unusual is happening.
 
-## Table Of Contents
-1. [Installation & Setup](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#installation--setup)
-   1. [Moving AltLauncher to the Game Directory](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#1-moving-altlauncher-to-the-game-directory)
-   2. [Configuring AltLauncher.ini](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#2-configuring-altlauncherini)
-   3. [Set up your Environment Paths](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#3-set-up-your-environment-paths)
-2. [The AltLauncher File](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#the-altlauncherini-file)
-3. [Usage Workflow](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#usage-workflow)
-4. [Command Line Usage](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#command-line-usage)
-5. [Auto-Updater](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#auto-updater)
-6. [Troubleshooting](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#troubleshooting)
-7. [Known Issues](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#known-issues)
-8. [Screenshots](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#screenshots)
+---
 
-## Installation & Setup
+## Who is it for?
 
-#### 1. Moving AltLauncher to the Game Directory
-To ensure proper functionality:
+### DID / Plural Systems
 
--   Place `AltLauncher.exe` and `AltLauncher.ini` inside the game’s main directory. 
--   If you wish to use the auto-updater, you should also place `AltLauncher.Updater.exe` inside the game's main directory too.
--   The executable should reside in the same folder as the game's primary `.exe` file.
+AltLauncher was built primarily for use by [DID (Dissociative Identity Disorder)](https://en.wikipedia.org/wiki/Dissociative_identity_disorder) systems and other plural systems, where multiple alters share a single body - and often a single computer.
 
-#### 2. Configuring AltLauncher.ini
-The **AltLauncher.ini** file dictates the behavior of the launcher. You will need to gather the necessary registry paths, directory locations, and file dependencies.
+Different alters frequently have different tastes in games, different playstyles, and different progress they want to preserve. Having one alter's save overwrite another's is frustrating and, in some systems, a real source of conflict.
 
-To correctly populate `AltLauncher.ini`, consult **PCGamingWiki**:
+With AltLauncher, each alter gets their own named profile. Whoever is fronting selects their profile when launching the game, and their saves are loaded automatically. When they're done, everything is saved back to their profile and the system is restored cleanly.
 
-1.  Search for your game on [PCGamingWiki](https://www.pcgamingwiki.com).
-2.  Locate registry paths, save file locations, and configuration directories.
-3.  Use the provided information to define your `AltLauncher.ini` settings.
-    - See [The AltLauncher.ini File](https://github.com/AetherCollective/AltLauncher/tree/main?tab=readme-ov-file#the-altlauncherini-file) for more info.
+### Families and Shared PCs
 
-Before you do all the hard work yourself, see if there's an AltLauncher.ini for your game in the [Templates](https://github.com/aethercollective/altlauncher-templates) area. 
+AltLauncher works equally well for families where multiple people share a gaming PC. Parents and kids can each have their own save profiles for the same game without any risk of overwriting each other's progress. Each family member gets their own named profile, and selecting it at launch is all that's needed.
 
-AltLauncher will ask you if you want to download a template if you did not complete this step. If your game is not found, let us know [HERE](https://github.com/AetherCollective/AltLauncher-Templates/issues/new?template=game-request.md)
+---
 
-#### 3. Set up your Environment Paths
+## How it works
 
-  - It is recommended to set the environment flag `AltLauncher_Path` to point to where you want your save files to be stored. 
-    - By default, this is `C:\Alters`, but you could set it to any cloud-synced folder if you wish.
-  - You may also want to set the environment flag `AltLauncher_SubPath` if you desire a certain sub-folder structure. 
-    - For example: a subpath value of `Files\GameSaves` with the default AltLauncher_Path path would resolve to `C:\Alters\<ProfileName>\Files\GameSaves`. By default, this value is blank.
+AltLauncher is configured per-game via a `.ini` file that tells it where the game's save files live, what executable to launch, and any other game-specific settings. When you launch AltLauncher instead of the game directly:
 
-## The AltLauncher.ini File
+1. A profile picker appears showing all available profiles
+2. You select your profile (or create a new one)
+3. AltLauncher swaps in your save files, directories, and registry keys
+4. The game launches
+5. When the game closes, your saves are written back to your profile and the previous state is restored
 
-Here are key fields that require user configuration:
+If the game crashes or AltLauncher is closed unexpectedly, a state file ensures saves are restored correctly on the next launch.
 
-**General Settings**
+---
 
-```ini
-[General]
-Name=GameName
-Path=C:\path\to\game\folder
-Executable=GameExecutable.exe
-LaunchFlags=-some_flag
-```
+## Features
 
--   **`Name`**: Display name of the game.
--   **`Path`**: Optional path to game's folder.
--   **`Executable`**: The game’s `.exe` file name.
--   **`LaunchFlags`**: Optional command-line arguments for custom execution.
+- **Per-profile save isolation** - files, folders, and registry keys all swapped per profile
+- **Profile switcher** - hold Shift when the game closes, or enable `SwitchMode`, to switch which profile the session is saved to without relaunching
+- **Safe Mode** - choose whether deleted saves go to the Recycle Bin, are permanently deleted, or are preserved
+- **Auto-detection** - can detect your game via Steam App ID and download a pre-made config template automatically
+- **Crash recovery** - state file prevents save loss if the process is interrupted mid-session
+- **Early exit** - hold Escape for 5 seconds during play to trigger an emergency restore if the game freezes or fails to close normally
+- **Customizable UI** - button layout, size, and direction are all configurable via environment variables
 
-**Settings**
+---
 
-```ini
-[Settings]
-MinWait=5
-MaxWait=10
-SaveDelay=3500
-```
+## Quick Start
 
--   **`MinWait` / `MaxWait`**: Overrides how long AltLauncher waits before confirming the game has closed.
--   **`SaveDelay`**: Overrides how long AltLauncher waits after the game has closed before moving save files.
+### 1. Download and place AltLauncher
 
-**Profile Management**
+Download the [latest release](https://github.com/AetherCollective/AltLauncher/releases/latest) and place `AltLauncher.exe` next to your game's executable.
 
-```ini
-[Profiles]
-Path=%USERPROFILE%\Documents\AltLauncher
-SubPath=Saves
-```
+### 2. Set up Steam (or your launcher) to use AltLauncher
 
--   Overrides where the game's save files are stored on a per-game basis.
--   **`Path`**: Location where AltLauncher stores profile-related files.
--   **`SubPath`**: Subdirectory where game-specific profiles reside.
+**For Steam games:**
 
-**Mapping your game**  
-
-Each entry for **Registry**, **Directories**, and **Files** follows a **key=value** mapping. 
-
-The key is the user-preference unique name of the .reg file, Directory, or File and will be mapped to 
-
-```ini
-%AltLauncher_Path%\<ProfileName>\%AltLauncher_SubPath%\%Name%
-```
-
--   **%Name%**  refers to the Name field in `AltLauncher.ini`.
-
-The value is the path of the registry, directory, or file your game needs to map. This could be a folder leading to where your game's savedata is, or a configuration file. You could even decide to map each individual file slot (if your game stores their slots in separate files). 
-
-**Registry Examples:**
-
-```ini
-Registry=HKEY_CURRENT_USER\Software\Burst2flame Entertainment\Stolen Realm
-```
-
-```ini
-HKLM=HKEY_LOCAL_MACHINE\SOFTWARE\Wizards of the Coast\MTGArena
-HKCU=HKEY_CURRENT_USER\Software\Wizards Of The Coast\MTGA
-```
-
-> HKEY_LOCAL_MACHINE paths requires you to run AltLauncher as an Administrator.
-
-##### Directories Examples:
-
-Directories can have an empty key field, which will use the root folder of `%AltLauncher_Path%\<ProfileName>\%AltLauncher_SubPath%\%Name%`. Useful if your game stores all its save files in a single directory.
-
-```ini
-=C:\Program Files (x86)\Steam\userdata\1101577702\1798020
-```
-
-```ini
-saves=C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames\4dd63af8-2773-4b68-a6bb-22498c58d514\4502
-```
-
-**File Examples:**
-
-```ini
-6898594.save=C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames\4dd63af8-2773-4b68-a6bb-22498c58d514\4502\6898594.save
-119004278.save=C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames\4dd63af8-2773-4b68-a6bb-22498c58d514\4502\119004278.save
-```
-
-## Usage Workflow
-1.  **Launch AltLauncher** via `AltLauncher.exe` or command-line.
-2.  The script will process the configuration, registry settings, and profile data.
-3.  If necessary, it will back up files before launching the game.
-4.  The game launches, and AltLauncher monitors its process.
-5.  Once the game closes, AltLauncher restores settings and exits gracefully.
-
-## Command Line Usage
-AltLauncher can be executed with command-line parameters:
+1. Right-click the game → Properties
+2. In Launch Options, enter the full path to `AltLauncher.exe` followed by `-- %command%`
 
 ```
-AltLauncher.exe "ProfileName"
-
+"C:\Program Files (x86)\Steam\steamapps\common\Hollow Knight\AltLauncher.exe" -- %command%
 ```
 
--   Replace `"ProfileName"` with the desired profile folder name.
--   When running from a script or batch file, ensure the profile name matches one present in the `Profiles` directory.
--   If you do not define a profile, it will check the `%AltLauncher_Path%\Selected_Profile.txt` file and use it's value. If this file is missing or is invalid, you will receive an error.
+**For non-Steam shortcuts:**
 
+Put the full path to `AltLauncher.exe` in the Target box. Do **not** add `-- %command%` for non-Steam games.
+
+### 3. Run once for setup
+
+On first run, AltLauncher will guide you through setting your profiles folder location, Safe Mode preference, and platform IDs.
+
+### 4. Launch and pick your profile
+
+AltLauncher will show a profile picker each time you launch. Select your profile - or hit `+` to create a new one - and the game will start with your saves loaded automatically.
+
+---
+
+## Setup Wizard
+
+On first run, AltLauncher will ask for:
+
+1. Where to store profiles (defaults to `C:\AltLauncher`)
+2. An optional sub-path inside each profile folder
+3. Safe Mode preference - Recycle Bin, permanent delete, or preserve
+4. Whether to prompt for a profile each launch or auto-load the last used one
+5. Steam3 ID (auto-detected if only one Steam account exists on the machine)
+6. Steam64 ID (auto-detected if possible)
+7. Ubisoft ID
+
+These are saved as Windows environment variables under `HKCU\Environment` and apply globally across all games.
+
+---
+
+## Game Launch Lifecycle
+
+AltLauncher follows this exact sequence every time a game is launched:
+
+1. **Backup** - registry keys, directories, and files are backed up from the game location
+2. **Load profile** - the selected profile's saves are swapped into place
+3. **Run launcher script** - if `AltLauncher-launcher.cmd` exists alongside the exe, it runs first
+4. **Run game** - the game executable is launched
+5. **Wait for game to close**
+6. **Redirect hook** - if Shift is held or `SwitchMode` is enabled, the profile picker appears so saves can be redirected to a different profile
+7. **Save to profile** - the session's saves are written back to the active profile
+8. **Restore** - original files and registry keys are restored
+9. **Cleanup** - the state file is deleted
+
+---
+
+## Beacon - USB Flash Drive Support
+
+Beacon is a companion utility that lets you store your save profiles on a USB flash drive. Run `Beacon.exe` from the drive to activate it - AltLauncher will automatically use the drive's `AltLauncher` folder for that session without touching any of your permanent settings. Run it again to deactivate.
+
+**How to use it:**
+
+1. Place `Beacon.exe` in the root of your flash drive
+2. Create a `AltLauncher` folder next to it (Beacon will create it automatically if it doesn't exist)
+3. Optionally create a `AltLauncher\Environment.reg` file to carry your platform IDs and AltLauncher settings with the drive (see [Environment Variables](#environment-variables))
+4. Run `Beacon.exe` before launching any game - a tray icon will appear confirming it's active
+5. Launch your game through AltLauncher as normal
+6. Run `Beacon.exe` again to stop it when you're done
+
+**If the drive is disconnected mid-session**, AltLauncher will pause and wait for you to reconnect it before saving. If you can't reconnect the drive, hold **Escape for 5 seconds** to export your live save files as a zip to your desktop, then AltLauncher will exit cleanly.
+
+**Environment.reg** - if your flash drive contains `AltLauncher\Environment.reg`, Beacon will import it on startup, applying your platform IDs and preferences automatically. Your existing settings are backed up and restored when Beacon stops, so nothing is permanently changed.
+
+---
+
+## Environment Variables
+
+AltLauncher stores its global settings in `HKCU\Environment`. These act as defaults for all games and can be overridden per-game in the ini file.
+
+### Core Settings
+
+| Variable | Description | Values |
+|---|---|---|
+| `AltLauncher_Path` | Root folder where all profiles are stored | Absolute path |
+| `AltLauncher_SubPath` | Optional subfolder inside each profile | String or empty |
+| `AltLauncher_SafeMode` | How deleted files are handled during restore | `"True"`, `"False"`, or unset |
+| `AltLauncher_UseProfileFile` | Auto-load last profile instead of prompting | `"True"` or `"False"` |
+| `AltLauncher_SwitchMode` | Always prompt for profile switch after game closes | `"True"` or `"False"` |
+
+### UI Layout
+
+| Variable | Description | Default |
+|---|---|---|
+| `AltLauncher_ButtonWidth` | Width of each profile button | `120` |
+| `AltLauncher_ButtonHeight` | Height of each profile button | `55` |
+| `AltLauncher_ButtonSpacing` | Pixel spacing between buttons | `4` |
+| `AltLauncher_NumberOfButtonsPerDirection` | Max buttons per row or column | `5` |
+| `AltLauncher_ButtonDirection` | Layout direction | `"down"` or `"right"` |
+
+### Platform IDs
+
+| Variable | Description |
+|---|---|
+| `SteamID3` | Steam3 ID (folder name under `userdata`) |
+| `SteamID64` | Steam64 ID (used by some games) |
+| `UbisoftID` | Ubisoft Connect save folder ID |
+| `RockstarID` | Rockstar Social Club ID |
+
+---
+
+## Profile Folder Structure
 
 ```
-AltLauncher.exe --select
-
+C:\AltLauncher\                     <- AltLauncher_Path
+  └── Emily\                        <- Profile name
+        └── <SubPath>\              <- AltLauncher_SubPath (if set)
+              └── Hollow Knight\    <- Game name from ini
+                    ├── Saves\      <- Directory backup
+                    └── config.reg  <- Registry backup
 ```
 
--  Forces the select user dialog to show up.
+---
 
+## Switching Profiles Mid-Session
 
-```
-AltLauncher.exe --load
+If one person started a gaming session and another finished it, you can redirect where the saves go when the game closes:
 
-```
+- **Hold Shift** while the game closes, or
+- Set `AltLauncher_SwitchMode=True` to always be prompted
 
--  Supresses the select user dialog and loads the profile specified at `%AltLauncher_Path%\Selected Profile.txt`
+AltLauncher will show the profile picker again and save the session to whichever profile you choose.
 
-```
-AltLauncher.exe --setup
+---
 
-```
+## Command-Line Flags
 
--  Re-runs the first time setup.
+| Flag | Behavior |
+|---|---|
+| `--` | No special behavior (used to pass Steam's `%command%`) |
+| `--select` | Forces the profile selection window to appear |
+| `--setup` | Runs the setup wizard |
+| `<profile name>` | Any other value is treated as a direct profile name, skipping the picker |
 
-## Auto-Updater
-AltLauncher comes with an auto updater program that can act as a drop-in replacement for AltLauncher. It will automatically update AltLauncher to the latest version before execution. If you wish to use as a drop-in replacement, just update your shortcut/launcher to launch `AltLauncher.Updater.exe` instead of `AltLauncher.exe`
+---
 
-## Tips
-  - On Steam, you can modify the launch options to run the game through AltLauncher:
-	  - `"C:\Path\To\AltLauncher.exe" -- %command%`
-  - AltLauncher can detect when a save file has been erased by the player and can recycling or delete them from the profile folder. This behavior can be controlled with the environment variable: `AltLauncher_SafeMode` or the ini setting: `[Settings]SafeMode`
-	  - When set to `True`, erased files will be sent to the recycling bin. This allows the user to recover the files if deleted by accident.
-	  - When set to `False`, erased files will be permanently deleted. Be careful as this offers no way to recover your deleted saves.
-	  -	When unset, erased files will be preserved. Your deleted save files will be restored the next time you run AltLauncher. This is the default setting.
-  - AltLauncher supports **environment variable expansion**, allowing dynamic resolution of paths:
-	-   `%USERPROFILE%` will automatically expand to `C:\Users\YourUsername`
-	-   `%LOCALAPPDATA%` expands to `C:\Users\YourUsername\AppData\Local`
-	-   `%APPDATA%` expands to `C:\Users\YourUsername\AppData\Roaming`
-	-   `%PROGRAMFILES%` expands to `C:\Program Files`
-	-   `%PROGRAMFILES(x86)%` expands to `C:\Program Files (x86)`
-	-   `%PROGRAMDATA%` expands to `C:\ProgramData`
-  - Set the environment paths `%SteamID3%`, `%SteamID64%`, `%UbisoftID%`, and `%RockstarID%` to your user-id. 
-	  - You can obtain your user-id by checking the following directories: 
-		  - `C:\Program Files (x86)\Steam\userdata`
-		  - `C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames`
-	  - You can look up your `%SteamID64%` by visiting [steamid.io](https://steamid.io/)
-    - You can look up your `%RockstarID%` by checking the `%UserProfile%\OneDrive\Documents\Rockstar Games\<game>\Profiles` directory.
-      ##### You can use these environment variables inside `AltLauncher.ini` for flexible path resolution.
+## Safe Mode
+
+Safe Mode controls what happens to files that exist in a profile but are no longer present in the game directory when restoring:
+
+| Setting | Behavior |
+|---|---|
+| `True` | Extra files are sent to the Recycle Bin |
+| `False` | Extra files are permanently deleted |
+| Unset | The entire directory is moved wholesale - nothing is deleted |
+
+---
+
+## Early Exit
+
+If the game freezes or AltLauncher fails to detect that the game has closed, hold **Escape for 5 seconds**. This triggers an emergency restore - files and registry keys are restored cleanly and AltLauncher exits safely.
+
+---
 
 ## Troubleshooting
-  - If **AltLauncher.ini** is missing, ensure it's located in the same directory as `AltLauncher.exe`.
-  - If the game fails to launch, verify that the `Executable` entry matches the correct `.exe` file.
-  - If profiles are not loading correctly, check the `ProfilesPath` for missing directories.
-  - Windows 11 uses `%UserProfile%\OneDrive\Documents` for your documents folder instead of `%UserProfile%\Documents`. 
-  - If your save files are not being swapped out when changing profiles, check and make sure your directories and file are correctly mapped in `AltLauncher.ini`. See [Obtaining Paths](https://github.com/AetherCollective/AltLauncher?tab=readme-ov-file#obtaining-paths).
-  - If all else fails, we have a [Discord](https://discord.gg/zVAa2vkU5M) server where you can receive support! 
 
-## Known Issues
-Xbox App Games are probably not going to work without taking ownership of protected folders and forcibly disabling cloud sync. Support will not be provided for Xbox App Games. Sorry!
+**Multiple INI files found** - Remove duplicates. Only one `AltLauncher.ini` is allowed per game directory.
 
-While traditional cloud syncing is supported and recommended, on-demand cloud syncing is not. Backups that normally generate at runtime do not get deleted properly when this feature is on. Please turn off this feature in your cloud syncing app, settings like `always available offline/locally` usually aren't enough:
+**Game doesn't launch** - Check that `Executable` and `Path` in the ini are correct, and that paths with spaces are quoted.
 
-  - OneDrive: Files On-Demand - [link](https://support.microsoft.com/en-us/office/save-disk-space-with-onedrive-files-on-demand-for-windows-0e6860d3-d9f3-4971-b321-7092438fb38e#ocpExpandoHeadTitleContainer:~:text=How%20to%20turn%20on%20Files%20on%20Demand)
-  - Google Drive: Streaming Mode - [link](https://support.google.com/drive/answer/13401938?sjid=17121236587031128354-NA#zippy=%2Cwhen-you-switch-from-streaming-to-mirroring:~:text=To-,switch%20from%20streaming%20to%20mirroring,-%3A)
-  - Dropbox: Online-Only Files - [link](https://help.dropbox.com/sync/make-files-online-only)
-  - Nextcloud: Virtual File Support - [link](https://docs.nextcloud.com/desktop/latest/navigating.html#configuring-nextcloud-account-settings:~:text=The%20little%20button%20with%20three%20dots%20(the%20overflow%20menu)%20that%20sits%20to%20the%20right%20of%20the%20sync%20status%20bar%20offers%20additional%20options%3A)
+**Profile switching doesn't work** - Make sure `AltLauncher_SwitchMode=True` is set, or hold Shift when the game closes.
 
-## Screenshots
-![AltLauncher](https://github.com/user-attachments/assets/5f72428a-ecc9-4ad5-ac4e-85fa006f897c)
-![AltSetter](https://github.com/user-attachments/assets/30dedf93-d374-4a71-a013-7c0338f9d0bf)
-![Steam](https://github.com/user-attachments/assets/1d99c311-326f-440c-86b3-9960744a730d)
-[![Running](https://img.youtube.com/vi/dk0EhCbnRkw/0.jpg)](https://www.youtube.com/watch?v=dk0EhCbnRkw)
+**Files aren't restoring correctly** - Check your Safe Mode setting. Extra files may be getting recycled or deleted unexpectedly.
+
+**Game saves to a different location than expected** - Some games redirect saves at runtime. Check the ini's `[Directories]` and `[Files]` sections point to where saves actually land, not just where the game's documentation says they go.
+
+---
+
+## Requirements
+
+- Windows
+- [AutoIt v3.3.16.0+](https://www.autoitscript.com/site/autoit/) (to run from source) or the compiled .exe
+
+---
+
+
+## Config Templates
+
+Game-specific config files are maintained separately at [AetherCollective/AltLauncher-Templates](https://github.com/AetherCollective/AltLauncher-Templates). If your game is in the database, AltLauncher can download the config automatically on first launch. See [AetherCollective/AltLauncher-Templates/README.md](https://github.com/AetherCollective/AltLauncher-Templates?tab=readme-ov-file#altLauncher-config-reference) for how to write your own.
+
+---
+
+## License
+
+See [LICENSE](LICENSE) for details.
