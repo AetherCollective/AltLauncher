@@ -2,7 +2,7 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.3.0.0
+#AutoIt3Wrapper_Res_Fileversion=0.3.0.1
 #AutoIt3Wrapper_Res_Language=1033
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
@@ -30,6 +30,7 @@ Global Const $StateFile = @ScriptDir & "\" & $ScriptBaseName & ".state"
 Global Const $LauncherCmd = @ScriptDir & "\" & $ScriptBaseName & "-launcher.cmd"
 Global Const $BEACON_ENV = "AltLauncher_BeaconPath"
 Global $BeaconActive = False
+Global $bEarlyExit = False
 
 ReadEnvironmentVariables()
 If RegRead("HKCU\Environment", "AltLauncher_Path") = "" And EnvGet($BEACON_ENV) = "" Then Setup()
@@ -89,7 +90,7 @@ Func WaitForDriveReconnect()
 			Return
 		EndIf
 	WEnd
-	; Beacon came back - re-read path in case drive letter changed
+	; Beacon came back re-read path from registry in case drive letter changed
 	Local $sPath = RegRead("HKCU\Environment", $BEACON_ENV)
 	If Not @error And $sPath <> "" Then
 		$Config["ProfilesPath"] = $sPath
@@ -124,7 +125,7 @@ Func _EmergencyZipToDesktop()
 EndFunc   ;==>_EmergencyZipToDesktop
 
 Func ReadINISection(ByRef $Ini, $Section)
-	$Data = IniReadSection($Ini, $Section)
+	Local $Data = IniReadSection($Ini, $Section)
 	If @error Then
 		Local $Data[1][2]
 		$Data[0][0] = 0
@@ -429,21 +430,21 @@ Func WaitWhileGameRunning()
 	ProgressSet(100, "Waiting for game to close...")
 	While Not ProcessExists($Config["Executable"])
 		Sleep(250)
+		If $bEarlyExit Then Return
 	WEnd
 	$timer = TimerInit()
 	While ProcessExists($Config["Executable"])
 		Sleep(250)
+		If $bEarlyExit Then Return
 	WEnd
-	; Some games (e.g. South Park: TFBW) launch via a stub process that exits immediately
-	; and hands off to a second process. If the first process dies faster than MinWait
-	; seconds, assume it was just a launcher stub and wait up to MaxWait seconds for
-	; the real game process to appear, then wait for that to finish too.
 	If TimerDiff($timer) < $Config["MinWait"] * 1000 Then
 		While Not ProcessExists($Config["Executable"]) And TimerDiff($timer) < $Config["MaxWait"] * 1000
 			Sleep(250)
+			If $bEarlyExit Then Return
 		WEnd
 		While ProcessExists($Config["Executable"])
 			Sleep(250)
+			If $bEarlyExit Then Return
 		WEnd
 	EndIf
 EndFunc   ;==>WaitWhileGameRunning
@@ -607,8 +608,7 @@ Func EarlyExitCheck()
 	EndIf
 	If $GUI["EarlyExitCheck"] >= 5 Then
 		ProgressSet(100, "Early Exit Triggered!")
-		Sleep(1000)
-		WhenGameCloses()
+		$bEarlyExit = True
 	EndIf
 EndFunc   ;==>EarlyExitCheck
 
