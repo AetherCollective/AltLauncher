@@ -2,8 +2,8 @@
 #AutoIt3Wrapper_Icon=Resources\AltLauncher.ico
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Fileversion=0.3.0.1
 #AutoIt3Wrapper_Res_Language=1033
+#AutoIt3Wrapper_Res_Fileversion=0.3.0.2
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
 #include <File.au3>
@@ -158,7 +158,7 @@ Func ReadConfig()
 			Switch MsgBox(4, $Title, "AltLauncher.ini not found. Would you like to download a template from the internet?")
 				Case $IDYES
 					$gameName = DetectGame()
-					If $gameName = -1 Or $gameName = 0 Or $gameName = 1 Or $gameName = 2 Then ExitMSG("Your game is not in our database. Exiting...")
+					If IsInt($gameName) Then ExitMSG("Your game is not in our database. Exiting...")
 					If IsString($gameName) Then
 						$downloaded = DownloadGameConfig($gameName)
 						If Int($downloaded) <> 1 Then ExitMSG($ScriptBaseName & ".ini could not be downloaded at this time. Please try again later.")
