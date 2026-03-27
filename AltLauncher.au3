@@ -3,7 +3,7 @@
 #AutoIt3Wrapper_Outfile=Build\AltLauncher.exe
 #AutoIt3Wrapper_UseX64=n
 #AutoIt3Wrapper_Res_Language=1033
-#AutoIt3Wrapper_Res_Fileversion=0.3.0.2
+#AutoIt3Wrapper_Res_Fileversion=0.3.0.3
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Constants.au3>
 #include <File.au3>
@@ -237,7 +237,13 @@ Func DetectGame()
 	Next
 	If Not $success Then Return 0    ; download failed
 	$steamID = EnvGet("steamappid")
-	If $steamID = "" Then Return 1   ; no steam id detected
+	If $steamID = "" Then
+		$SearchResults = _FileListToArrayRec(@ScriptDir, "steam_appid.txt", $FLTAR_FILES, $FLTAR_RECUR)
+		If IsArray($SearchResults) And $SearchResults[0] >= 1 Then
+			$steamID = Int(FileRead(@ScriptDir & "\" & $SearchResults[1]))
+		EndIf
+		If $steamID = 0 Then Return 1 ; no steam id detected
+	EndIf
 	$games = IniReadSection($savePath, "Steam")
 	If @error Then Return 2          ; db corrupt
 	$gameName = ""
